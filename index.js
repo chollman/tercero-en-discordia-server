@@ -1,14 +1,17 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
+require("./services/passport");
+const keys = require("./config/keys");
 
-// app
+mongoose.connect(keys.mongoURI, {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useUnifiedTopology: true,
+});
+
 const app = express();
 
-// routes middleware
-app.use("/", (req, res) => {
-    res.send({ hi: "there" });
-});
+require("./routes/authRoutes")(app);
 
 const PORT = process.env.PORT || 5000;
 
