@@ -1,10 +1,9 @@
 const express = require("express");
+const http = require("http");
 const mongoose = require("mongoose");
-const cookieSession = require("cookie-session");
-const passport = require("passport");
+const bodyParser = require("body-parser");
+const morgan = require("morgan");
 const keys = require("./config/keys");
-require("./models/user");
-require("./services/passport");
 
 mongoose.connect(keys.mongoURI, {
     useNewUrlParser: true,
@@ -14,20 +13,16 @@ mongoose.connect(keys.mongoURI, {
 
 const app = express();
 
-app.use(
-    cookieSession({
-        maxAge: 30 * 24 * 60 * 60 * 1000, //30 days in miliseconds
-        keys: [keys.cookieKey],
-    })
-);
+app.use(morgan("combined"));
+app.use(bodyParser.json({ type: "*/*" }));
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-require("./routes/authRoutes")(app);
+require("./router")(app);
+//require("./routes/authRoutes")(app);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+const server = http.createServer(app);
+
+server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
