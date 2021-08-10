@@ -6,6 +6,7 @@ const ExtractJwt = require("passport-jwt").ExtractJwt;
 const User = require("../models/user");
 const keys = require("../config/keys");
 
+// AUTH USING LOCAL
 const localOptions = { usernameField: "email" };
 passport.use(
     new LocalStrategy(localOptions, (email, password, done) => {
@@ -29,6 +30,7 @@ passport.use(
     })
 );
 
+// AUTH USING GOOGLE OAUTH
 passport.serializeUser((user, done) => {
     done(null, user.id);
 });
@@ -59,7 +61,7 @@ passport.use(
     )
 );
 
-// Setup options for JWT Strategy
+// // AUTH USING JWT
 const jwtOptions = {
     jwtFromRequest: ExtractJwt.fromHeader("authorization"),
     secretOrKey: keys.secret,
