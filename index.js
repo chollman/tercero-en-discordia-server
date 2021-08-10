@@ -14,20 +14,8 @@ mongoose.connect(keys.mongoURI, {
 
 const app = express();
 
-const corsOptions = {
-    origin: ["http://localhost:3000"],
-    default: "http://localhost:3000",
-};
-
-app.all("*", function (req, res, next) {
-    var origin =
-        corsOptions.origin.indexOf(req.header("origin").toLowerCase()) > -1 ? req.headers.origin : corsOptions.default;
-    res.header("Access-Control-Allow-Origin", origin);
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
-
 app.use(morgan("combined"));
+app.use(cors());
 app.use(bodyParser.json({ type: "*/*" }));
 
 require("./router")(app);
