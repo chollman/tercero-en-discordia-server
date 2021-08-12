@@ -16,12 +16,12 @@ router.post("/signin", requireSignin, Authentication.signin);
 router.post("/signup", Authentication.signup);
 
 // Book
-router.get("/Book", Book.getAllBooks);
-router.get("/Book/:id", Book.read);
-router.post("/Book", Book.createBook);
-router.put("/Book/:id", Book.updateBook);
-router.delete("/Book/:id", Book.deleteBook);
+router.get("/books", Book.getAllBooks);
+router.get("/book/:id", Book.read);
+router.post("/book", Book.createBook);
+router.put("/book/:id", Book.updateBook);
+router.delete("/book/:id", Book.deleteBook);
 
-router.param(":id", Book.getBookById);
+router.param("id", Book.getBookById);
 
 module.exports = router;

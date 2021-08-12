@@ -15,10 +15,12 @@ mongoose.connect(keys.mongoURI, {
 
 const app = express();
 
+// middlewares
 app.use(morgan("combined"));
 app.use(cors());
-app.use(bodyParser.json({ type: "*/*" }));
+app.use(bodyParser.json());
 
+// routes middleware
 app.use("/api", router);
 //require("./routes/authRoutes")(app);
 
