@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Authentication = require("./controllers/authentication");
-const Books = require("controllers/book");
+const Book = require("./controllers/book");
 require("./services/passport");
 const passport = require("passport");
 
@@ -15,11 +15,13 @@ router.get("/", requireAuth, (req, res) => {
 router.post("/signin", requireSignin, Authentication.signin);
 router.post("/signup", Authentication.signup);
 
-// Books
-router.get("/books", Books.getAllBooks);
-router.get("/books/:id", Books.getBookById);
-router.post("/books/:id", Books.createBook);
-router.put("/books/:id", Books.updateBook);
-router.delete("/books/:id", Books.deleteBook);
+// Book
+router.get("/Book", Book.getAllBooks);
+router.get("/Book/:id", Book.read);
+router.post("/Book", Book.createBook);
+router.put("/Book/:id", Book.updateBook);
+router.delete("/Book/:id", Book.deleteBook);
+
+router.param(":id", Book.getBookById);
 
 module.exports = router;
