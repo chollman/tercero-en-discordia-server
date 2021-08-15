@@ -3,6 +3,7 @@ const http = require("http");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
+const expressValidator = require("express-validator");
 const keys = require("./config/keys");
 const cors = require("cors");
 const router = require("./router");
@@ -20,6 +21,7 @@ const app = express();
 app.use(morgan("combined"));
 app.use(cors());
 app.use(bodyParser.json({ type: "*/*" }));
+app.use(expressValidator());
 
 app.use("/api", router);
 //require("./routes/authRoutes")(app);
