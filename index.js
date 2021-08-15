@@ -7,11 +7,13 @@ const keys = require("./config/keys");
 const cors = require("cors");
 const router = require("./router");
 
-mongoose.connect(keys.mongoURI, {
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useUnifiedTopology: true,
-});
+mongoose
+    .connect(keys.mongoURI, {
+        useNewUrlParser: true,
+        useCreateIndex: true,
+        useUnifiedTopology: true,
+    })
+    .then(() => console.log("DB Connected"));
 
 const app = express();
 
