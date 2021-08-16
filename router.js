@@ -31,7 +31,7 @@ router.get("/secret/:userId", requireAuth, Authentication.isAuth, Authentication
 // Categories
 //router.get("/category", Category.getAll);
 //router.get("/category/:id", Category.getById);
-router.post("/category", requireAuth, Category.create);
+router.post("/category/:userId", requireAuth, Authentication.isAuth, Authentication.isAdmin, Category.create);
 // router.put("/category/:id", Category.update);
 // router.delete("/category/:id", Category.delete);
 
