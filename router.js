@@ -20,7 +20,7 @@ router.get("/", requireAuth, (req, res) => {
 router.post("/signin", requireSignin, Authentication.signin);
 router.post("/signup", userSignupValidator, Authentication.signup);
 
-// ================= User =================
+// ================== User ==================
 router.param("userId", userById);
 // Example route with isAuth middleware: con este middleware el usuario tiene que matchear su token con su id en base de datos para poder acceder
 // Example route with isAdmin middleware: con este middleware el usuario tiene que tener role > 0 para poder acceder
