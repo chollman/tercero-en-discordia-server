@@ -6,7 +6,13 @@ const morgan = require("morgan");
 const expressValidator = require("express-validator");
 const keys = require("./config/keys");
 const cors = require("cors");
-const router = require("./router");
+
+// IMPORT ROUTES
+const authRoutes = require("./routes/auth");
+const booksRoutes = require("./routes/books");
+const categoryRoutes = require("./routes/category");
+const userRoutes = require("./routes/user");
+const app = express();
 
 mongoose
     .connect(keys.mongoURI, {
@@ -16,15 +22,15 @@ mongoose
     })
     .then(() => console.log("DB Connected"));
 
-const app = express();
-
 app.use(morgan("combined"));
 app.use(cors());
-app.use(bodyParser.json({ type: "*/*" }));
 app.use(expressValidator());
+app.use(bodyParser.json());
 
-app.use("/api", router);
-//require("./routes/authRoutes")(app);
+app.use("/api", authRoutes);
+app.use("/api", booksRoutes);
+app.use("/api", categoryRoutes);
+app.use("/api", userRoutes);
 
 const PORT = process.env.PORT || 5000;
 

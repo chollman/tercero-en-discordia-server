@@ -1,25 +1,57 @@
+const formidable = require("formidable");
+//const _ = require("lodash");
+const fs = require("fs");
+const { errorHandler } = require("../helpers/dbErrorHandler");
 const Book = require("../models/book");
 
-exports.getAllBooks = (req, res, next) => {
+exports.getAll = (req, res, next) => {
     res.send({
         books: [{ name: "Test" }, { name: "Test2" }],
-        numberOfBooks: 2
+        numberOfBooks: 2,
     });
 };
 
-exports.getBookById = (req, res, next) => {
+exports.getById = (req, res, next) => {
     console.log(req.params.id);
     res.send("WIP");
 };
 
-exports.createBook = (req, res, next) => {
+exports.create = (req, res, next) => {
+    let form = new formidable.IncomingForm();
+    form.keepExtensions = true;
+    form.parse(req, (err, fields, files) => {
+        console.log(fields);
+        if (err) {
+            return res.status(400).json({
+                error: "La imagen no se pudo cargar",
+            });
+        }
+        let book = new Book(fields);
+        console.log(files);
+        if (files.coverImage) {
+            book.coverImage.data = fs.readFileSync(files.coverImage.path);
+            book.coverImage.contentType = files.coverImage.type;
+        }
+        if (files.backCoverImage) {
+            book.backCoverImage.data = fs.readFileSync(files.backCoverImage.path);
+            book.backCoverImage.contentType = files.backCoverImage.type;
+        }
+
+        book.save((err, result) => {
+            if (err) {
+                return res.status(400).json({
+                    error: errorHandler(err),
+                });
+            }
+            res.json(result);
+        });
+    });
+};
+
+exports.update = (req, res, next) => {
     res.send("WIP");
 };
 
-exports.updateBook = (req, res, next) => {
-    res.send("WIP");
-};
-
-exports.deleteBook = (req, res, next) => {
+exports.delete = (req, res, next) => {
     res.send("WIP");
 };
