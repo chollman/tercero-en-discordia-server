@@ -1,9 +1,12 @@
 const express = require("express");
 const router = express.Router();
+
 const Authentication = require("./controllers/authentication");
-const { userSignupValidator } = require("./validator");
 //const Books = require("./controllers/books");
 const Category = require("./controllers/category");
+const { userById } = require("./controllers/user");
+
+const { userSignupValidator } = require("./validator");
 require("./services/passport");
 const passport = require("passport");
 
@@ -16,6 +19,14 @@ router.get("/", requireAuth, (req, res) => {
 });
 router.post("/signin", requireSignin, Authentication.signin);
 router.post("/signup", userSignupValidator, Authentication.signup);
+
+// User
+router.param("userId", userById);
+// Example route with isAuth middleware: con este middleware el usuario tiene que matchear su token con su id en base de datos para poder acceder
+// Example route with isAdmin middleware: con este middleware el usuario tiene que tener role > 0 para poder acceder
+router.get("/secret/:userId", requireAuth, Authentication.isAuth, Authentication.isAdmin, (req, res) => {
+    res.json({ user: req.profile });
+});
 
 // Categories
 //router.get("/category", Category.getAll);

@@ -8,7 +8,8 @@ function tokenForUser(user) {
 }
 
 exports.signin = (req, res, next) => {
-    res.send({ token: tokenForUser(req.user) });
+    req.user.password = undefined;
+    res.send({ token: tokenForUser(req.user), user: req.user });
 };
 
 exports.signup = (req, res, next) => {
@@ -38,4 +39,23 @@ exports.signup = (req, res, next) => {
             res.json({ token: tokenForUser(user) });
         });
     });
+};
+
+exports.isAuth = (req, res, next) => {
+    let user = req.profile && req.user && req.profile.id === req.user.id;
+    if (!user) {
+        return res.status(403).json({
+            error: "Acceso denegado",
+        });
+    }
+    next();
+};
+
+exports.isAdmin = (req, res, next) => {
+    if (req.profile.role === 0) {
+        return res.status(403).json({
+            error: "El usuario no tiene privilegios de administrador",
+        });
+    }
+    next();
 };
