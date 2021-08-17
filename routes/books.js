@@ -5,7 +5,7 @@ require("../services/passport");
 const passport = require("passport");
 
 const Authentication = require("../controllers/authentication");
-const { getAllBooks, createBook, getById, getBook, deleteBook, updateBook } = require("../controllers/books");
+const { getAllBooks, createBook, getById, getBook, deleteBook, updateBook, getCover } = require("../controllers/books");
 const { userById } = require("../controllers/user");
 
 const requireAuth = passport.authenticate("jwt", { session: false });
@@ -18,5 +18,8 @@ router.get("/books/:bookId", getBook);
 router.post("/books/:userId", requireAuth, Authentication.isAuth, Authentication.isAdmin, createBook);
 router.put("/books/:bookId/:userId", requireAuth, Authentication.isAuth, Authentication.isAdmin, updateBook);
 router.delete("/books/:bookId/:userId", requireAuth, Authentication.isAuth, Authentication.isAdmin, deleteBook);
+
+router.get("/books/cover/:bookId", getCover);
+router.get("/books/backcover/:bookId", getBackCover);
 
 module.exports = router;

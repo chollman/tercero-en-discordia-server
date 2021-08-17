@@ -152,3 +152,19 @@ exports.deleteBook = (req, res, next) => {
         });
     });
 };
+
+exports.getCover = (req, res, next) => {
+    if (req.book.coverImage.data) {
+        res.set("Content-Type", req.book.coverImage.contentType);
+        return res.send(req.book.coverImage.data);
+    }
+    next();
+};
+
+exports.getBackCover = (req, res, next) => {
+    if (req.book.backCoverImage.data) {
+        res.set("Content-Type", req.book.backCoverImage.contentType);
+        return res.send(req.book.backCoverImage.data);
+    }
+    next();
+};
