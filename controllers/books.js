@@ -19,15 +19,17 @@ exports.getAllBooks = (req, res, next) => {
 };
 
 exports.getById = (req, res, next, id) => {
-    Book.findById(id).exec((err, book) => {
-        if (err || !book) {
-            return res.status(400).json({
-                error: "El libro no existe",
-            });
-        }
-        req.book = book;
-        next();
-    });
+    Book.findById(id)
+        .populate("category")
+        .exec((err, book) => {
+            if (err || !book) {
+                return res.status(400).json({
+                    error: "El libro no existe",
+                });
+            }
+            req.book = book;
+            next();
+        });
 };
 
 exports.getBook = (req, res) => {
