@@ -1,5 +1,5 @@
 const formidable = require("formidable");
-//const _ = require("lodash");
+const _ = require("lodash");
 const fs = require("fs");
 const { errorHandler } = require("../helpers/dbErrorHandler");
 const Book = require("../models/book");
@@ -38,7 +38,17 @@ exports.createBook = (req, res, next) => {
                 error: "La imagen no se pudo cargar",
             });
         }
+
+        const { title, author, category } = fields;
+
+        if (!title || !author || !category) {
+            return res.status(400).json({
+                error: "Debe especificar al menos un título, autor y categoría",
+            });
+        }
+
         let book = new Book(fields);
+
         if (files.coverImage) {
             if (files.coverImage.size > 1000000) {
                 return res.status(400).json({
@@ -58,14 +68,6 @@ exports.createBook = (req, res, next) => {
             book.backCoverImage.contentType = files.backCoverImage.type;
         }
 
-        const { title, author, category } = fields;
-
-        if (!title || !author || !category) {
-            return res.status(400).json({
-                error: "Debe especificar al menos un título, autor y categoría",
-            });
-        }
-
         book.save((err, result) => {
             if (err) {
                 return res.status(400).json({
@@ -77,8 +79,55 @@ exports.createBook = (req, res, next) => {
     });
 };
 
-exports.update = (req, res, next) => {
-    res.send("WIP");
+exports.updateBook = (req, res, next) => {
+    let form = new formidable.IncomingForm();
+    form.keepExtensions = true;
+    form.parse(req, (err, fields, files) => {
+        if (err) {
+            return res.status(400).json({
+                error: "La imagen no se pudo cargar",
+            });
+        }
+
+        const { title, author, category } = fields;
+
+        if (!title || !author || !category) {
+            return res.status(400).json({
+                error: "Debe especificar al menos un título, autor y categoría",
+            });
+        }
+
+        let book = req.book;
+        book = _.extend(book, fields);
+
+        if (files.coverImage) {
+            if (files.coverImage.size > 1000000) {
+                return res.status(400).json({
+                    error: "La imágen es demasiado pesada",
+                });
+            }
+            book.coverImage.data = fs.readFileSync(files.coverImage.path);
+            book.coverImage.contentType = files.coverImage.type;
+        }
+        if (files.backCoverImage) {
+            if (files.backCoverImage.size > 1000000) {
+                return res.status(400).json({
+                    error: "La imágen es demasiado pesada",
+                });
+            }
+            book.backCoverImage.data = fs.readFileSync(files.backCoverImage.path);
+            book.backCoverImage.contentType = files.backCoverImage.type;
+        }
+
+        book.save((err, result) => {
+            if (err) {
+                return res.status(400).json({
+                    error: errorHandler(err),
+                });
+            }
+            res.json(result);
+        });
+    });
 };
 
 exports.deleteBook = (req, res, next) => {
