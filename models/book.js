@@ -7,7 +7,7 @@ const bookSchema = new Schema(
         title: { type: String, trim: true, required: true },
         description: { type: String, trim: true },
         author: { type: String, trim: true, required: true },
-        category: { type: ObjectId, ref: "Category", required: true },
+        category: { type: ObjectId, ref: "categories", required: true },
         coverImage: { data: Buffer, contentType: String },
         backCoverImage: { data: Buffer, contentType: String },
     },

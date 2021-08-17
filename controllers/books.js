@@ -5,18 +5,17 @@ const { errorHandler } = require("../helpers/dbErrorHandler");
 const Book = require("../models/book");
 
 exports.getAllBooks = (req, res, next) => {
-    Book.find().exec((err, data) => {
-        if (err) {
-            return res.status(400).json({
-                error: errorHandler(err),
-            });
-        }
-        data.map((book) => {
-            book.coverImage = undefined;
-            book.backCoverImage = undefined;
+    Book.find()
+        .select("-coverImage -backCoverImage")
+        .populate("category")
+        .exec((err, data) => {
+            if (err) {
+                return res.status(400).json({
+                    error: errorHandler(err),
+                });
+            }
+            res.send(data);
         });
-        res.json(data);
-    });
 };
 
 exports.getById = (req, res, next, id) => {
