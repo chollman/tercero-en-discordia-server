@@ -4,7 +4,7 @@ const fs = require("fs");
 const { errorHandler } = require("../helpers/dbErrorHandler");
 const Book = require("../models/book");
 
-exports.getAll = (req, res, next) => {
+exports.getAllBooks = (req, res, next) => {
     res.send({
         books: [{ name: "Test" }, { name: "Test2" }],
         numberOfBooks: 2,
