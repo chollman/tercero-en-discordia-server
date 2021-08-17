@@ -14,7 +14,7 @@ exports.getAllBooks = (req, res, next) => {
                     error: errorHandler(err),
                 });
             }
-            res.send(data);
+            res.json(data);
         });
 };
 
