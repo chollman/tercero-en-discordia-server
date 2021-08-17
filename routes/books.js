@@ -5,7 +5,16 @@ require("../services/passport");
 const passport = require("passport");
 
 const Authentication = require("../controllers/authentication");
-const { getAllBooks, createBook, getById, getBook, deleteBook, updateBook, getCover } = require("../controllers/books");
+const {
+    getAllBooks,
+    createBook,
+    getById,
+    getBook,
+    deleteBook,
+    updateBook,
+    getCover,
+    getBackCover,
+} = require("../controllers/books");
 const { userById } = require("../controllers/user");
 
 const requireAuth = passport.authenticate("jwt", { session: false });
