@@ -11,9 +11,22 @@ exports.getAll = (req, res, next) => {
     });
 };
 
-exports.getById = (req, res, next) => {
-    console.log(req.params.id);
-    res.send("WIP");
+exports.getById = (req, res, next, id) => {
+    Book.findById(id).exec((err, book) => {
+        if (err || !book) {
+            return res.status(400).json({
+                error: "El libro no existe",
+            });
+        }
+        req.book = book;
+        next();
+    });
+};
+
+exports.getBook = (req, res) => {
+    req.book.coverImage = undefined;
+    req.book.backCoverImage = undefined;
+    return res.json(req.book);
 };
 
 exports.create = (req, res, next) => {
@@ -27,12 +40,30 @@ exports.create = (req, res, next) => {
         }
         let book = new Book(fields);
         if (files.coverImage) {
+            if (files.coverImage.size > 1000000) {
+                return res.status(400).json({
+                    error: "La imágen es demasiado pesada",
+                });
+            }
             book.coverImage.data = fs.readFileSync(files.coverImage.path);
             book.coverImage.contentType = files.coverImage.type;
         }
         if (files.backCoverImage) {
+            if (files.backCoverImage.size > 1000000) {
+                return res.status(400).json({
+                    error: "La imágen es demasiado pesada",
+                });
+            }
             book.backCoverImage.data = fs.readFileSync(files.backCoverImage.path);
             book.backCoverImage.contentType = files.backCoverImage.type;
+        }
+
+        const { title, author, category } = fields;
+
+        if (!title || !author || !category) {
+            return res.status(400).json({
+                error: "Debe especificar al menos un título, autor y categoría",
+            });
         }
 
         book.save((err, result) => {
