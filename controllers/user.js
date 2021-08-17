@@ -11,3 +11,20 @@ exports.userById = (req, res, next, id) => {
         next();
     });
 };
+
+exports.readUser = (req, res, next) => {
+    req.profile.password = undefined;
+    return res.json(req.profile);
+};
+
+exports.updateUser = (req, res, next) => {
+    User.findOneAndUpdate({ _id: req.profile._id }, { $set: req.body }, { new: true }, (err, user) => {
+        if (err) {
+            return res.status(400).json({
+                error: "No estás autorizado a realizar ésta acción",
+            });
+        }
+        user.password = undefined;
+        res.json(user);
+    });
+};
