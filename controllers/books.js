@@ -29,7 +29,7 @@ exports.getBook = (req, res) => {
     return res.json(req.book);
 };
 
-exports.create = (req, res, next) => {
+exports.createBook = (req, res, next) => {
     let form = new formidable.IncomingForm();
     form.keepExtensions = true;
     form.parse(req, (err, fields, files) => {
@@ -81,6 +81,16 @@ exports.update = (req, res, next) => {
     res.send("WIP");
 };
 
-exports.delete = (req, res, next) => {
-    res.send("WIP");
+exports.deleteBook = (req, res, next) => {
+    let book = req.book;
+    book.remove((err, deletedBook) => {
+        if (err) {
+            return res.status(400).json({
+                error: errorHandler(err),
+            });
+        }
+        res.json({
+            message: "El libro fue borrado correctamente",
+        });
+    });
 };
