@@ -20,14 +20,12 @@ exports.create = (req, res, next) => {
     let form = new formidable.IncomingForm();
     form.keepExtensions = true;
     form.parse(req, (err, fields, files) => {
-        console.log(fields);
         if (err) {
             return res.status(400).json({
                 error: "La imagen no se pudo cargar",
             });
         }
         let book = new Book(fields);
-        console.log(files);
         if (files.coverImage) {
             book.coverImage.data = fs.readFileSync(files.coverImage.path);
             book.coverImage.contentType = files.coverImage.type;
