@@ -5,9 +5,17 @@ const { errorHandler } = require("../helpers/dbErrorHandler");
 const Book = require("../models/book");
 
 exports.getAllBooks = (req, res, next) => {
-    res.send({
-        books: [{ name: "Test" }, { name: "Test2" }],
-        numberOfBooks: 2,
+    Book.find().exec((err, data) => {
+        if (err) {
+            return res.status(400).json({
+                error: errorHandler(err),
+            });
+        }
+        data.map((book) => {
+            book.coverImage = undefined;
+            book.backCoverImage = undefined;
+        });
+        res.json(data);
     });
 };
 
