@@ -40,10 +40,27 @@ exports.createCategory = (req, res, next) => {
     });
 };
 
-exports.update = (req, res, next) => {
-    res.send("WIP");
+exports.updateCategory = (req, res, next) => {
+    const category = req.category;
+    category.name = req.body.name;
+    category.save((err, data) => {
+        if (err) {
+            return res.status(400).json({
+                error: errorHandler(err),
+            });
+        }
+        res.json(data);
+    });
 };
 
-exports.delete = (req, res, next) => {
-    res.send("WIP");
+exports.deleteCategory = (req, res, next) => {
+    const category = req.category;
+    category.remove((err, data) => {
+        if (err) {
+            return res.status(400).json({
+                error: errorHandler(err),
+            });
+        }
+        res.json({ message: "La categoría se eliminó correctamente" });
+    });
 };
