@@ -9,7 +9,7 @@ const cors = require("cors");
 
 // IMPORT ROUTES
 const authRoutes = require("./routes/auth");
-const booksRoutes = require("./routes/books");
+const booksRoutes = require("./routes/book");
 const categoryRoutes = require("./routes/category");
 const userRoutes = require("./routes/user");
 const app = express();

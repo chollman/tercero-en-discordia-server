@@ -14,7 +14,7 @@ const {
     updateBook,
     getCover,
     getBackCover,
-} = require("../controllers/books");
+} = require("../controllers/book");
 const { userById } = require("../controllers/user");
 
 const requireAuth = passport.authenticate("jwt", { session: false });
