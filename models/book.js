@@ -1,30 +1,17 @@
 const mongoose = require("mongoose");
-const { Schema } = mongoose;
+const { Schema, ObjectId } = mongoose;
 
-const bookSchema = new Schema({
-    title: {
-        type: String,
-        required: true,
-        maxlength: 100,
+const bookSchema = new Schema(
+    {
+        id: Number,
+        title: { type: String, trim: true, required: true },
+        description: { type: String, trim: true },
+        author: { type: String, trim: true },
+        category: { type: ObjectId, ref: "Category", required: true },
+        coverImage: { data: Buffer, contentType: String },
+        backCoverImage: { data: Buffer, contentType: String },
     },
-    author: {
-        type: String,
-        required: true,
-        maxlength: 100,
-    },
-    description: {
-        type: String,
-        required: true,
-        maxlength: 2000,
-    },
-    coverImage: {
-        data: Buffer,
-        contentType: String,
-    },
-    backCoverImage: {
-        data: Buffer,
-        contentType: String,
-    },
-});
+    { timestamps: true }
+);
 
 module.exports = mongoose.model("books", bookSchema);

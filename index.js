@@ -3,24 +3,26 @@ const http = require("http");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
+const expressValidator = require("express-validator");
 const keys = require("./config/keys");
 const cors = require("cors");
 const router = require("./router");
 
-mongoose.connect(keys.mongoURI, {
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useUnifiedTopology: true,
-});
+mongoose
+    .connect(keys.mongoURI, {
+        useNewUrlParser: true,
+        useCreateIndex: true,
+        useUnifiedTopology: true,
+    })
+    .then(() => console.log("DB Connected"));
 
 const app = express();
 
-// middlewares
 app.use(morgan("combined"));
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ type: "*/*" }));
+app.use(expressValidator());
 
-// routes middleware
 app.use("/api", router);
 //require("./routes/authRoutes")(app);
 
