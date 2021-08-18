@@ -10,13 +10,24 @@ exports.getAllBooks = (req, res, next) => {
 };
 
 exports.read = (req, res, next) => {
-    res.send("WIP");
+    return res.json(req.book);
 };
 
 // Middleware to instantiate the book each time it is used
 exports.getBookById = (req, res, next, id) => {
     console.log(id);
-    next();
+    Book.findById(id)
+        .populate("category")
+        .exec((err, book) => {
+            if (err || !book) {
+                console.log(err);
+                return res.status(400).json({
+                    error: "Book not found",
+                });
+            }
+            req.book = book;
+            next();
+        });
 };
 
 exports.createBook = (req, res) => {
