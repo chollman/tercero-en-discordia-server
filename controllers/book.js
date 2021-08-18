@@ -28,10 +28,10 @@ exports.createBook = (req, res) => {
             });
         }
         //check fields
-        const { title, author, description } = fields;
+        const { title, author, description, category } = fields;
 
         // TODO: Do we need regex validation for fields?
-        if (!title || !author || !description) {
+        if (!title || !author || !description || !category) {
             return res.status(400).json({
                 error: "All fields are required",
             });
