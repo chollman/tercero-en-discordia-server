@@ -20,12 +20,18 @@ const requireAuth = passport.authenticate("jwt", { session: false });
 router.param("categoryId", catById);
 router.param("userId", userById);
 
-router.get("/category", getAllCategories);
-router.get("/category/:categoryId", getCategory);
-router.post("/category/:userId", requireAuth, Authentication.isAuth, Authentication.isAdmin, createCategory);
-router.put("/category/:categoryId/:userId", requireAuth, Authentication.isAuth, Authentication.isAdmin, updateCategory);
+router.get("/categories", getAllCategories);
+router.get("/categories/:categoryId", getCategory);
+router.post("/categories/:userId", requireAuth, Authentication.isAuth, Authentication.isAdmin, createCategory);
+router.put(
+    "/categories/:categoryId/:userId",
+    requireAuth,
+    Authentication.isAuth,
+    Authentication.isAdmin,
+    updateCategory
+);
 router.delete(
-    "/category/:categoryId/:userId",
+    "/categories/:categoryId/:userId",
     requireAuth,
     Authentication.isAuth,
     Authentication.isAdmin,
