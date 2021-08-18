@@ -10,6 +10,8 @@ exports.getAllBooks = (req, res, next) => {
 };
 
 exports.read = (req, res, next) => {
+    req.book.coverImage = undefined;
+    req.book.backCoverImage = undefined;
     return res.json(req.book);
 };
 
@@ -78,6 +80,8 @@ exports.createBook = (req, res) => {
                     error: err,
                 });
             }
+            result.coverImage= undefined;
+            result.backCoverImage = undefined;
             res.json(result);
             // TODO: No devolver las imagenes en la response para mejor performance
         });
