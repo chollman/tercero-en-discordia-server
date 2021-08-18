@@ -3,10 +3,23 @@ const fs = require("fs");
 const Book = require("../models/book");
 
 exports.getAllBooks = (req, res, next) => {
-    res.send({
-        books: [{ name: "Test" }, { name: "Test2" }],
-        numberOfBooks: 2,
-    });
+    let order = req.query.order ? req.query.order : 'asc';
+    let sortBy = req.query.sortBy ? req.query.sortBy : '_id';
+    let limit = req.query.limit ? parseInt(req.query.limit) : 6;
+
+    Book.find()
+        .select("-coverImage -backCoverImage")
+        .populate("category")
+        .sort([[sortBy, order]])
+        .limit(limit)
+        .exec((err, books) => {
+            if (err) {
+                return res.status(400).json({
+                    error: 'Books not found'
+                });
+            }
+            res.json(books);
+        });
 };
 
 exports.read = (req, res, next) => {
