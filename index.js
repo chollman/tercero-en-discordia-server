@@ -20,7 +20,7 @@ const app = express();
 
 app.use(morgan("combined"));
 app.use(cors());
-app.use(bodyParser.json({ type: "*/*" }));
+app.use(bodyParser.json({ type: "" }));
 app.use(expressValidator());
 
 app.use("/api", router);

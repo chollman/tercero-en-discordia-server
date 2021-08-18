@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const Authentication = require("./controllers/authentication");
-//const Books = require("./controllers/books");
+const Books = require("./controllers/book");
 const Category = require("./controllers/category");
 const { userById } = require("./controllers/user");
 
@@ -36,10 +36,10 @@ router.post("/category/:userId", requireAuth, Authentication.isAuth, Authenticat
 // router.delete("/category/:id", Category.delete);
 
 // ================ Books ================
-// router.get("/books", Books.getAllBooks);
-// router.get("/books/:id", Books.getBookById);
-// router.post("/books", Books.createBook);
-// router.put("/books/:id", Books.updateBook);
-// router.delete("/books/:id", Books.deleteBook);
+router.get("/books", Books.getAllBooks);
+router.get("/book/:id", Books.getBookById);
+router.post("/book", Books.createBook);
+router.put("/book/:id", Books.updateBook);
+router.delete("/book/:id", Books.deleteBook);
 
 module.exports = router;
