@@ -83,6 +83,8 @@ exports.createBook = (req, res, next) => {
                     error: errorHandler(err),
                 });
             }
+            result.coverImage = undefined;
+            result.backCoverImage = undefined;
             res.json(result);
         });
     });
