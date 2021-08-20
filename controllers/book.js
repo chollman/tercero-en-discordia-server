@@ -9,11 +9,15 @@ const MAX_NUMBER_OF_FETCHED_BOOKS = 100;
 //Example call with params: api/books?limit=5&sortBy=title&order=asc
 
 exports.getAllBooks = (req, res) => {
-    let order = req.query.order ? req.query.order : 'asc';
-    let sortBy = req.query.sortBy ? req.query.sortBy : '_id';
+    let order = req.query.order ? req.query.order : "asc";
+    let sortBy = req.query.sortBy ? req.query.sortBy : "_id";
     let limit = req.query.limit ? parseInt(req.query.limit) : MAX_NUMBER_OF_FETCHED_BOOKS;
 
-    Book.find()
+    const query = {};
+
+    addCategoriesToQuery(query, req);
+
+    Book.find(query)
         .select("-coverImage -backCoverImage")
         .populate("category")
         .sort([[sortBy, order]])
@@ -181,4 +185,35 @@ exports.getBackCover = (req, res, next) => {
         return res.send(req.book.backCoverImage.data);
     }
     next();
+};
+
+exports.getBooksBySearch = (req, res) => {
+    const query = {};
+
+    addCategoriesToQuery(query, req);
+    addSearchToQuery(query, req);
+
+    Book.find(query, (err, books) => {
+        if (err) {
+            return res.status(400).json({
+                error: errorHandler(err),
+            });
+        }
+        res.json(books);
+    })
+        .select("-coverImage -backCoverImage")
+        .populate("category");
+};
+
+addCategoriesToQuery = (query, req) => {
+    if (req.query.categories) {
+        query.category = { $in: req.query.categories.split(",") };
+    }
+};
+
+addSearchToQuery = (query, req) => {
+    if (req.query.search) {
+        const regex = { $regex: req.query.search, $options: "i" };
+        query.$or = [{ author: regex }, { title: regex }, { description: regex }, { isbn: regex }];
+    }
 };
