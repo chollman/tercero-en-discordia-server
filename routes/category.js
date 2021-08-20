@@ -4,7 +4,7 @@ const router = express.Router();
 require("../services/passport");
 const passport = require("passport");
 
-const Authentication = require("../controllers/authentication");
+const { isAuth, isAdmin } = require("../controllers/authentication");
 const {
     getAllCategories,
     catById,
@@ -22,20 +22,8 @@ router.param("userId", userById);
 
 router.get("/categories", getAllCategories);
 router.get("/categories/:categoryId", getCategory);
-router.post("/categories/:userId", requireAuth, Authentication.isAuth, Authentication.isAdmin, createCategory);
-router.put(
-    "/categories/:categoryId/:userId",
-    requireAuth,
-    Authentication.isAuth,
-    Authentication.isAdmin,
-    updateCategory
-);
-router.delete(
-    "/categories/:categoryId/:userId",
-    requireAuth,
-    Authentication.isAuth,
-    Authentication.isAdmin,
-    deleteCategory
-);
+router.post("/categories/:userId", requireAuth, isAuth, isAdmin, createCategory);
+router.put("/categories/:categoryId/:userId", requireAuth, isAuth, isAdmin, updateCategory);
+router.delete("/categories/:categoryId/:userId", requireAuth, isAuth, isAdmin, deleteCategory);
 
 module.exports = router;
