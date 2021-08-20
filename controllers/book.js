@@ -36,7 +36,7 @@ exports.getById = (req, res, next, id) => {
         .populate("category")
         .exec((err, book) => {
             if (err || !book) {
-                return res.status(400).json({
+                return res.status(404).json({
                     error: "El libro no existe",
                 });
             }
@@ -46,12 +46,11 @@ exports.getById = (req, res, next, id) => {
 };
 
 exports.getBook = (req, res) => {
-    req.book.coverImage = undefined;
-    req.book.backCoverImage = undefined;
+    removeImages(req.book);
     return res.json(req.book);
 };
 
-exports.createBook = (req, res, next) => {
+exports.createBook = (req, res) => {
     let form = new formidable.IncomingForm();
     form.keepExtensions = true;
     form.parse(req, (err, fields, files) => {
@@ -71,24 +70,8 @@ exports.createBook = (req, res, next) => {
 
         let book = new Book(fields);
 
-        if (files.coverImage) {
-            if (files.coverImage.size > 1000000) {
-                return res.status(400).json({
-                    error: "La imágen es demasiado pesada",
-                });
-            }
-            book.coverImage.data = fs.readFileSync(files.coverImage.path);
-            book.coverImage.contentType = files.coverImage.type;
-        }
-        if (files.backCoverImage) {
-            if (files.backCoverImage.size > 1000000) {
-                return res.status(400).json({
-                    error: "La imágen es demasiado pesada",
-                });
-            }
-            book.backCoverImage.data = fs.readFileSync(files.backCoverImage.path);
-            book.backCoverImage.contentType = files.backCoverImage.type;
-        }
+        loadImageInBook(book.coverImage, files.coverImage, res);
+        loadImageInBook(book.backCoverImage, files.backCoverImage, res);
 
         book.save((err, result) => {
             if (err) {
@@ -96,14 +79,13 @@ exports.createBook = (req, res, next) => {
                     error: errorHandler(err),
                 });
             }
-            result.coverImage = undefined;
-            result.backCoverImage = undefined;
-            res.json(result);
+            removeImages(result);
+            res.status(201).json(result);
         });
     });
 };
 
-exports.updateBook = (req, res, next) => {
+exports.updateBook = (req, res) => {
     let form = new formidable.IncomingForm();
     form.keepExtensions = true;
     form.parse(req, (err, fields, files) => {
@@ -124,24 +106,8 @@ exports.updateBook = (req, res, next) => {
         let book = req.book;
         book = _.extend(book, fields);
 
-        if (files.coverImage) {
-            if (files.coverImage.size > 1000000) {
-                return res.status(400).json({
-                    error: "La imágen es demasiado pesada",
-                });
-            }
-            book.coverImage.data = fs.readFileSync(files.coverImage.path);
-            book.coverImage.contentType = files.coverImage.type;
-        }
-        if (files.backCoverImage) {
-            if (files.backCoverImage.size > 1000000) {
-                return res.status(400).json({
-                    error: "La imágen es demasiado pesada",
-                });
-            }
-            book.backCoverImage.data = fs.readFileSync(files.backCoverImage.path);
-            book.backCoverImage.contentType = files.backCoverImage.type;
-        }
+        loadImageInBook(book.coverImage, files.coverImage, res);
+        loadImageInBook(book.backCoverImage, files.backCoverImage, res);
 
         book.save((err, result) => {
             if (err) {
@@ -149,14 +115,13 @@ exports.updateBook = (req, res, next) => {
                     error: errorHandler(err),
                 });
             }
-            result.coverImage = undefined;
-            result.backCoverImage = undefined;
+            removeImages(result);
             res.json(result);
         });
     });
 };
 
-exports.deleteBook = (req, res, next) => {
+exports.deleteBook = (req, res) => {
     let book = req.book;
     book.remove((err, deletedBook) => {
         if (err) {
@@ -164,6 +129,7 @@ exports.deleteBook = (req, res, next) => {
                 error: errorHandler(err),
             });
         }
+        console.log(`book: ${deletedBook.id} was deleted by user: ${req.profile.email} `);
         res.json({
             message: "El libro fue borrado correctamente",
         });
@@ -217,3 +183,20 @@ addSearchToQuery = (query, req) => {
         query.$or = [{ author: regex }, { title: regex }, { description: regex }, { isbn: regex }];
     }
 };
+
+removeImages = book => {
+    book.coverImage = undefined;
+    book.backCoverImage = undefined;
+}
+
+loadImageInBook = (bookImage, image, res) => {
+    if (image) {
+        if (image.size > 1000000) {
+            return res.status(400).json({
+                error: "La imagen es demasiado pesada",
+            });
+        }
+        bookImage.data = fs.readFileSync(image.path);
+        bookImage.contentType = image.type;
+    }
+}
