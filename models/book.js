@@ -12,6 +12,8 @@ const bookSchema = new Schema(
         category: { type: ObjectId, ref: "categories", required: true },
         coverImage: { data: Buffer, contentType: String },
         backCoverImage: { data: Buffer, contentType: String },
+        hasCoverImage: { type: Boolean },
+        hasBackCoverImage: { type: Boolean },
     },
     { timestamps: true }
 );

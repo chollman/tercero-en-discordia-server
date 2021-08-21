@@ -70,8 +70,14 @@ exports.createBook = (req, res) => {
 
         let book = new Book(fields);
 
-        loadImageInBook(book.coverImage, files.coverImage, res);
-        loadImageInBook(book.backCoverImage, files.backCoverImage, res);
+        if (files.coverImage) {
+            loadImageInBook(book.coverImage, files.coverImage, res);
+            book.hasCoverImage = true;
+        }
+        if (files.backCoverImage) {
+            loadImageInBook(book.backCoverImage, files.backCoverImage, res);
+            book.hasBackCoverImage = true;
+        }
 
         book.save((err, result) => {
             if (err) {
@@ -106,8 +112,14 @@ exports.updateBook = (req, res) => {
         let book = req.book;
         book = _.extend(book, fields);
 
-        loadImageInBook(book.coverImage, files.coverImage, res);
-        loadImageInBook(book.backCoverImage, files.backCoverImage, res);
+        if (files.coverImage) {
+            loadImageInBook(book.coverImage, files.coverImage, res);
+            book.hasCoverImage = true;
+        }
+        if (files.backCoverImage) {
+            loadImageInBook(book.backCoverImage, files.backCoverImage, res);
+            book.hasBackCoverImage = true;
+        }
 
         book.save((err, result) => {
             if (err) {
@@ -184,10 +196,10 @@ addSearchToQuery = (query, req) => {
     }
 };
 
-removeImages = book => {
+removeImages = (book) => {
     book.coverImage = undefined;
     book.backCoverImage = undefined;
-}
+};
 
 loadImageInBook = (bookImage, image, res) => {
     if (image) {
@@ -199,4 +211,4 @@ loadImageInBook = (bookImage, image, res) => {
         bookImage.data = fs.readFileSync(image.path);
         bookImage.contentType = image.type;
     }
-}
+};
