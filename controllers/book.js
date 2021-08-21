@@ -70,11 +70,12 @@ exports.createBook = (req, res) => {
 
         let book = new Book(fields);
 
-        if (files.coverImage) {
+        if (files.coverImage.size > 0) {
             loadImageInBook(book.coverImage, files.coverImage, res);
             book.hasCoverImage = true;
         }
-        if (files.backCoverImage) {
+        console.log(files.backCoverImage > 0);
+        if (files.backCoverImage.size) {
             loadImageInBook(book.backCoverImage, files.backCoverImage, res);
             book.hasBackCoverImage = true;
         }
@@ -112,11 +113,11 @@ exports.updateBook = (req, res) => {
         let book = req.book;
         book = _.extend(book, fields);
 
-        if (files.coverImage) {
+        if (files.coverImage.size > 0) {
             loadImageInBook(book.coverImage, files.coverImage, res);
             book.hasCoverImage = true;
         }
-        if (files.backCoverImage) {
+        if (files.backCoverImage.size > 0) {
             loadImageInBook(book.backCoverImage, files.backCoverImage, res);
             book.hasBackCoverImage = true;
         }
