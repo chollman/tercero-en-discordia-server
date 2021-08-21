@@ -74,7 +74,6 @@ exports.createBook = (req, res) => {
             loadImageInBook(book.coverImage, files.coverImage, res);
             book.hasCoverImage = true;
         }
-        console.log(files.backCoverImage > 0);
         if (files.backCoverImage.size) {
             loadImageInBook(book.backCoverImage, files.backCoverImage, res);
             book.hasBackCoverImage = true;
