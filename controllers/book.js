@@ -70,11 +70,11 @@ exports.createBook = (req, res) => {
 
         let book = new Book(fields);
 
-        if (files.coverImage.size > 0) {
+        if (files.coverImage && files.coverImage.size > 0) {
             loadImageInBook(book.coverImage, files.coverImage, res);
             book.hasCoverImage = true;
         }
-        if (files.backCoverImage.size) {
+        if (files.backCoverImage && files.backCoverImage.size) {
             loadImageInBook(book.backCoverImage, files.backCoverImage, res);
             book.hasBackCoverImage = true;
         }
@@ -101,22 +101,14 @@ exports.updateBook = (req, res) => {
             });
         }
 
-        const { title, author, category } = fields;
-
-        if (!title || !author || !category) {
-            return res.status(400).json({
-                error: "Debe especificar al menos un título, autor y categoría",
-            });
-        }
-
         let book = req.book;
         book = _.extend(book, fields);
 
-        if (files.coverImage.size > 0) {
+        if (files.coverImage && files.coverImage.size > 0) {
             loadImageInBook(book.coverImage, files.coverImage, res);
             book.hasCoverImage = true;
         }
-        if (files.backCoverImage.size > 0) {
+        if (files.backCoverImage && files.backCoverImage.size > 0) {
             loadImageInBook(book.backCoverImage, files.backCoverImage, res);
             book.hasBackCoverImage = true;
         }
