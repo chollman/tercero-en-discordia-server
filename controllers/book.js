@@ -2,6 +2,7 @@ const formidable = require("formidable");
 const _ = require("lodash");
 const fs = require("fs");
 const { errorHandler } = require("../helpers/dbErrorHandler");
+const mongoose = require("mongoose");
 const Book = require("../models/book");
 const Category = require("../models/category");
 
@@ -49,65 +50,43 @@ exports.getById = (req, res, next, id) => {
 exports.getBook = (req, res) => res.json(createBookForResponse(req.book));
 
 exports.createBook = (req, res) => {
-    let form = new formidable.IncomingForm();
-    form.keepExtensions = true;
-    form.parse(req, (err, fields, files) => {
+    const { fields, files } = req;
+    const { title, author, category } = fields;
+
+    if (!title || !author || !category) {
+        return res.status(400).json({
+            error: "Debe especificar al menos un título, autor y categoría",
+        });
+    }
+    let book = new Book(fields);
+
+    setImageAsCover(book.coverImage, files.coverImage);
+    setImageAsCover(book.backCoverImage, files.backCoverImage);
+
+    book.save((err, result) => {
         if (err) {
             return res.status(400).json({
-                error: "La imagen no se pudo cargar",
+                error: errorHandler(err),
             });
         }
-
-        const { title, author, category } = fields;
-
-        if (!title || !author || !category) {
-            return res.status(400).json({
-                error: "Debe especificar al menos un título, autor y categoría",
-            });
-        }
-
-        let book = new Book(fields);
-
-        setImageAsCover(book.coverImage, files.coverImage, res);
-        setImageAsCover(book.backCoverImage, files.backCoverImage, res);
-
-        book.save((err, result) => {
-            if (err) {
-                return res.status(400).json({
-                    error: errorHandler(err),
-                });
-            }
-            res.status(201).json(createBookForResponse(result));
-        });
+        res.status(201).json(createBookForResponse(result));
     });
 };
 
 exports.updateBook = (req, res) => {
-    let form = new formidable.IncomingForm();
-    form.keepExtensions = true;
-    form.parse(req, (err, fields, files) => {
+    const { fields, files } = req;
+    let book = _.extend(req.book, fields);
+
+    setImageAsCover(book.coverImage, files.coverImage);
+    setImageAsCover(book.backCoverImage, files.backCoverImage);
+
+    book.save((err, result) => {
         if (err) {
             return res.status(400).json({
-                error: "La imagen no se pudo cargar",
+                error: errorHandler(err),
             });
         }
-
-        // TODO: Check if the category received is valid
-
-        let book = req.book;
-        book = _.extend(book, fields);
-
-        setImageAsCover(book.coverImage, files.coverImage, res);
-        setImageAsCover(book.backCoverImage, files.backCoverImage, res);
-
-        book.save((err, result) => {
-            if (err) {
-                return res.status(400).json({
-                    error: errorHandler(err),
-                });
-            }
-            res.json(createBookForResponse(result));
-        });
+        res.json(createBookForResponse(result));
     });
 };
 
@@ -193,6 +172,61 @@ exports.getCategoriesInUse = (req, res) => {
     });
 };
 
+exports.validateUpsertForm = (req, res, next) => {
+    let form = new formidable.IncomingForm();
+    form.keepExtensions = true;
+    form.parse(req, async (err, fields, files) => {
+        if (err) {
+            return res.status(400).json({
+                error: "La imagen no se pudo cargar",
+            });
+        }
+
+        const { category } = fields;
+        if (category) {
+            if (!mongoose.Types.ObjectId.isValid(category)) {
+                return res.status(400).json({
+                    error: "La categoría enviada tiene un formato de id incorrecto",
+                });
+            }
+            if (!(await categoryExists(category))) {
+                return res.status(400).json({
+                    error: "La categoría enviada no existe",
+                });
+            }
+        }
+
+        const { coverImage, backCoverImage } = files;
+        if (coverImage) {
+            if (!coverImage.size > 0) {
+                return res.status(400).json({
+                    error: "Se recibió una imagen nula",
+                });
+            }
+            if (coverImage.size > 1000000) {
+                return res.status(400).json({
+                    error: "La imagen es demasiado pesada",
+                });
+            }
+        }
+        if (backCoverImage) {
+            if (!backCoverImage.size > 0) {
+                return res.status(400).json({
+                    error: "Se recibió una imagen nula",
+                });
+            }
+            if (backCoverImage.size > 1000000) {
+                return res.status(400).json({
+                    error: "La imagen es demasiado pesada",
+                });
+            }
+        }
+        req.fields = fields;
+        req.files = files;
+        next();
+    });
+};
+
 const addCategoriesToQuery = (query, req) => {
     if (req.query.categories) {
         query.category = { $in: req.query.categories.split(",") };
@@ -224,19 +258,13 @@ const setCoverStatus = (book) => {
     book.hasBackCoverImage = !!book.backCoverImage;
 };
 
-const setImageAsCover = (bookCover, image, res) => {
+const setImageAsCover = (bookCover, image) => {
     if (image) {
-        if (!image.size > 0) {
-            return res.status(400).json({
-                error: "Se recibió una imagen nula",
-            });
-        }
-        if (image.size > 1000000) {
-            return res.status(400).json({
-                error: "La imagen es demasiado pesada",
-            });
-        }
         bookCover.data = fs.readFileSync(image.path);
         bookCover.contentType = image.type;
     }
+};
+
+const categoryExists = async (categoryId) => {
+    return !!(await Category.findById(categoryId));
 };
