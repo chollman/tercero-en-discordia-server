@@ -45,10 +45,7 @@ exports.getById = (req, res, next, id) => {
         });
 };
 
-exports.getBook = (req, res) => {
-    removeImages(req.book);
-    return res.json(req.book);
-};
+exports.getBook = (req, res) => res.json(createBookForResponse(req.book));
 
 exports.createBook = (req, res) => {
     let form = new formidable.IncomingForm();
@@ -70,14 +67,8 @@ exports.createBook = (req, res) => {
 
         let book = new Book(fields);
 
-        if (files.coverImage && files.coverImage.size > 0) {
-            loadImageInBook(book.coverImage, files.coverImage, res);
-            book.hasCoverImage = true;
-        }
-        if (files.backCoverImage && files.backCoverImage.size) {
-            loadImageInBook(book.backCoverImage, files.backCoverImage, res);
-            book.hasBackCoverImage = true;
-        }
+        setImageAsCover(book.coverImage, files.coverImage, res);
+        setImageAsCover(book.backCoverImage, files.backCoverImage, res);
 
         book.save((err, result) => {
             if (err) {
@@ -85,8 +76,7 @@ exports.createBook = (req, res) => {
                     error: errorHandler(err),
                 });
             }
-            removeImages(result);
-            res.status(201).json(result);
+            res.status(201).json(createBookForResponse(result));
         });
     });
 };
@@ -101,17 +91,13 @@ exports.updateBook = (req, res) => {
             });
         }
 
+        // TODO: Check if the category received is valid
+
         let book = req.book;
         book = _.extend(book, fields);
 
-        if (files.coverImage && files.coverImage.size > 0) {
-            loadImageInBook(book.coverImage, files.coverImage, res);
-            book.hasCoverImage = true;
-        }
-        if (files.backCoverImage && files.backCoverImage.size > 0) {
-            loadImageInBook(book.backCoverImage, files.backCoverImage, res);
-            book.hasBackCoverImage = true;
-        }
+        setImageAsCover(book.coverImage, files.coverImage, res);
+        setImageAsCover(book.backCoverImage, files.backCoverImage, res);
 
         book.save((err, result) => {
             if (err) {
@@ -119,8 +105,7 @@ exports.updateBook = (req, res) => {
                     error: errorHandler(err),
                 });
             }
-            removeImages(result);
-            res.json(result);
+            res.json(createBookForResponse(result));
         });
     });
 };
@@ -188,19 +173,37 @@ addSearchToQuery = (query, req) => {
     }
 };
 
+// Can't add properties to Mongoose object, so we turn it to JS object to return it.
+createBookForResponse = (book) => {
+    let bookForResponse = book.toObject();
+    setCoverStatus(bookForResponse);
+    removeImages(bookForResponse);
+    return bookForResponse;
+};
+
 removeImages = (book) => {
     book.coverImage = undefined;
     book.backCoverImage = undefined;
 };
 
-loadImageInBook = (bookImage, image, res) => {
+setCoverStatus = (book) => {
+    book.hasCoverImage = !!book.coverImage;
+    book.hasBackCoverImage = !!book.backCoverImage;
+};
+
+setImageAsCover = (bookCover, image, res) => {
     if (image) {
+        if (!image.size > 0) {
+            return res.status(400).json({
+                error: "Se recibió una imagen nula",
+            });
+        }
         if (image.size > 1000000) {
             return res.status(400).json({
                 error: "La imagen es demasiado pesada",
             });
         }
-        bookImage.data = fs.readFileSync(image.path);
-        bookImage.contentType = image.type;
+        bookCover.data = fs.readFileSync(image.path);
+        bookCover.contentType = image.type;
     }
 };
