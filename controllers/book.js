@@ -3,8 +3,10 @@ const _ = require("lodash");
 const fs = require("fs");
 const { errorHandler } = require("../helpers/dbErrorHandler");
 const Book = require("../models/book");
+const Category = require("../models/category");
 
 const MAX_NUMBER_OF_FETCHED_BOOKS = 100;
+const MAX_NUMBER_OF_FETCHED_RELATED_BOOKS = 5;
 
 //Example call: /api/books?limit=5&sortBy=title&order=asc
 exports.getAllBooks = (req, res) => {
@@ -154,8 +156,41 @@ exports.getBooksBySearch = (req, res) => {
             });
         }
         res.json(books.map(createBookForResponse));
-    })
-        .populate("category");
+    }).populate("category");
+};
+
+exports.getRelatedBooks = (req, res) => {
+    let limit = req.query.limit ? parseInt(req.query.limit) : MAX_NUMBER_OF_FETCHED_RELATED_BOOKS;
+
+    Book.find({ _id: { $ne: req.book }, category: req.book.category })
+        .limit(limit)
+        .populate("category")
+        .exec((err, books) => {
+            if (err) {
+                return res.status(400).json({
+                    error: errorHandler(err),
+                });
+            }
+            res.json(books.map(createBookForResponse));
+        });
+};
+
+exports.getCategoriesInUse = (req, res) => {
+    Book.distinct("category", {}, (err, categoryIds) => {
+        if (err) {
+            return res.status(400).json({
+                error: errorHandler(err),
+            });
+        }
+        Category.find({ _id: { $in: categoryIds } }).exec((err, categories) => {
+            if (err) {
+                return res.status(400).json({
+                    error: errorHandler(err),
+                });
+            }
+            res.json(categories);
+        });
+    });
 };
 
 addCategoriesToQuery = (query, req) => {

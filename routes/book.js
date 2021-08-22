@@ -15,6 +15,8 @@ const {
     getCover,
     getBackCover,
     getBooksBySearch,
+    getRelatedBooks,
+    getCategoriesInUse
 } = require("../controllers/book");
 const { userById } = require("../controllers/user");
 
@@ -22,6 +24,8 @@ const requireAuth = passport.authenticate("jwt", { session: false });
 
 router.get("/books", getAllBooks);
 router.get("/books/search", getBooksBySearch);
+router.get("/books/categories", getCategoriesInUse);
+router.get("/books/related/:bookId", getRelatedBooks);
 router.get("/books/:bookId", getBook);
 router.post("/books/:userId", requireAuth, isAuth, isAdmin, createBook);
 router.put("/books/:bookId/:userId", requireAuth, isAuth, isAdmin, updateBook);
