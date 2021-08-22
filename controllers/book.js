@@ -193,13 +193,13 @@ exports.getCategoriesInUse = (req, res) => {
     });
 };
 
-addCategoriesToQuery = (query, req) => {
+const addCategoriesToQuery = (query, req) => {
     if (req.query.categories) {
         query.category = { $in: req.query.categories.split(",") };
     }
 };
 
-addSearchToQuery = (query, req) => {
+const addSearchToQuery = (query, req) => {
     if (req.query.search) {
         const regex = { $regex: req.query.search, $options: "i" };
         query.$or = [{ author: regex }, { title: regex }, { description: regex }, { isbn: regex }];
@@ -207,24 +207,24 @@ addSearchToQuery = (query, req) => {
 };
 
 // Can't add properties to Mongoose object, so we turn it to JS object to return it.
-createBookForResponse = (book) => {
+const createBookForResponse = (book) => {
     let bookForResponse = book.toObject();
     setCoverStatus(bookForResponse);
     removeImages(bookForResponse);
     return bookForResponse;
 };
 
-removeImages = (book) => {
+const removeImages = (book) => {
     book.coverImage = undefined;
     book.backCoverImage = undefined;
 };
 
-setCoverStatus = (book) => {
+const setCoverStatus = (book) => {
     book.hasCoverImage = !!book.coverImage;
     book.hasBackCoverImage = !!book.backCoverImage;
 };
 
-setImageAsCover = (bookCover, image, res) => {
+const setImageAsCover = (bookCover, image, res) => {
     if (image) {
         if (!image.size > 0) {
             return res.status(400).json({
