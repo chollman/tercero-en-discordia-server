@@ -17,7 +17,6 @@ exports.getAllBooks = (req, res) => {
     addCategoriesToQuery(query, req);
 
     Book.find(query)
-        .select("-coverImage -backCoverImage")
         .populate("category")
         .sort([[sortBy, order]])
         .limit(limit)
@@ -27,7 +26,7 @@ exports.getAllBooks = (req, res) => {
                     error: errorHandler(err),
                 });
             }
-            res.json(data);
+            res.json(data.map(createBookForResponse));
         });
 };
 
@@ -154,9 +153,8 @@ exports.getBooksBySearch = (req, res) => {
                 error: errorHandler(err),
             });
         }
-        res.json(books);
+        res.json(books.map(createBookForResponse));
     })
-        .select("-coverImage -backCoverImage")
         .populate("category");
 };
 
