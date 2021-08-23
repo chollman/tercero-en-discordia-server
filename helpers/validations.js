@@ -20,10 +20,10 @@ exports.validateFormStatus = async (req, res, next) => {
     next();
 };
 
-exports.validateFieldsNotNull = (arrayOfFields) => (req, res, next) => {
+exports.validateFieldsNotNull = (arrayOfFields, errorMsg) => (req, res, next) => {
     if (!arrayOfFields.every((elem) => !!req.fields[elem])) {
         return res.status(400).json({
-            error: "Debe especificar al menos un título, autor y categoría",
+            error: errorMsg,
         });
     }
     next();

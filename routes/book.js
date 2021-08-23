@@ -41,7 +41,7 @@ router.post(
     isAuth,
     isAdmin,
     validateFormStatus,
-    validateFieldsNotNull(["author", "title", "category"]),
+    validateFieldsNotNull(["author", "title", "category"], "Debe especificar al menos un título, autor y categoría"),
     validateImage("coverImage"),
     validateImage("backCoverImage"),
     validateObjectId("category", Category),

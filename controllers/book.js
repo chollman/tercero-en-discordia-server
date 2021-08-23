@@ -1,6 +1,6 @@
 const _ = require("lodash");
-const fs = require("fs");
 const { errorHandler } = require("../helpers/dbErrorHandler");
+const { setImageInObject } = require("../helpers/utils");
 const Book = require("../models/book");
 const Category = require("../models/category");
 
@@ -49,12 +49,8 @@ exports.getBook = (req, res) => res.json(createBookForResponse(req.book));
 
 exports.createBook = (req, res) => {
     const { fields, files } = req;
-
     let book = new Book(fields);
-
-    setImageAsCover(book.coverImage, files.coverImage);
-    setImageAsCover(book.backCoverImage, files.backCoverImage);
-
+    setCoversInBook(book, files);
     book.save((err, result) => {
         if (err) {
             return res.status(400).json({
@@ -68,10 +64,7 @@ exports.createBook = (req, res) => {
 exports.updateBook = (req, res) => {
     const { fields, files } = req;
     let book = _.extend(req.book, fields);
-
-    setImageAsCover(book.coverImage, files.coverImage);
-    setImageAsCover(book.backCoverImage, files.backCoverImage);
-
+    setCoversInBook(book, files);
     book.save((err, result) => {
         if (err) {
             return res.status(400).json({
@@ -195,9 +188,7 @@ const setCoverStatus = (book) => {
     book.hasBackCoverImage = !!book.backCoverImage;
 };
 
-const setImageAsCover = (bookCover, image) => {
-    if (image) {
-        bookCover.data = fs.readFileSync(image.path);
-        bookCover.contentType = image.type;
-    }
+const setCoversInBook = (book, files) => {
+    setImageInObject(book.coverImage, files.coverImage);
+    setImageInObject(book.backCoverImage, files.backCoverImage);
 };
