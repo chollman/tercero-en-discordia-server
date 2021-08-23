@@ -8,7 +8,7 @@ const keys = require("./config/keys");
 const cors = require("cors");
 
 // IMPORT ROUTES
-const authRoutes = require("./routes/auth");
+const authRoutes = require("./routes/authentication");
 const booksRoutes = require("./routes/book");
 const categoryRoutes = require("./routes/category");
 const userRoutes = require("./routes/user");
