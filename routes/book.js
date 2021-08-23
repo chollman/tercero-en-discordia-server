@@ -19,8 +19,6 @@ const {
     getBooksBySearch,
     getRelatedBooks,
     getCategoriesInUse,
-    validateUpsertForm,
-    test,
 } = require("../controllers/book");
 const { userById } = require("../controllers/user");
 const {
