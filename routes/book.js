@@ -4,6 +4,8 @@ const router = express.Router();
 require("../services/passport");
 const passport = require("passport");
 
+const Category = require("../models/category");
+
 const { isAuth, isAdmin } = require("../controllers/authentication");
 const {
     getAllBooks,
@@ -18,9 +20,15 @@ const {
     getRelatedBooks,
     getCategoriesInUse,
     validateUpsertForm,
-    validateInsertRequiredFields
+    test,
 } = require("../controllers/book");
 const { userById } = require("../controllers/user");
+const {
+    validateFormStatus,
+    validateImage,
+    validateFieldsNotNull,
+    validateObjectId,
+} = require("../helpers/validations");
 
 const requireAuth = passport.authenticate("jwt", { session: false });
 
@@ -34,11 +42,24 @@ router.post(
     requireAuth,
     isAuth,
     isAdmin,
-    validateUpsertForm,
-    validateInsertRequiredFields,
+    validateFormStatus,
+    validateFieldsNotNull(["author", "title", "category"]),
+    validateImage("coverImage"),
+    validateImage("backCoverImage"),
+    validateObjectId("category", Category),
     createBook
 );
-router.put("/books/:bookId/:userId", requireAuth, isAuth, isAdmin, validateUpsertForm, updateBook);
+router.put(
+    "/books/:bookId/:userId",
+    requireAuth,
+    isAuth,
+    isAdmin,
+    validateFormStatus,
+    validateImage("coverImage"),
+    validateImage("backCoverImage"),
+    validateObjectId("category", Category),
+    updateBook
+);
 router.delete("/books/:bookId/:userId", requireAuth, isAuth, isAdmin, deleteBook);
 
 router.get("/books/cover/:bookId", getCover);
