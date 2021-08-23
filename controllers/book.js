@@ -5,6 +5,7 @@ const { errorHandler } = require("../helpers/dbErrorHandler");
 const mongoose = require("mongoose");
 const Book = require("../models/book");
 const Category = require("../models/category");
+const { existsInDatabase, validateImage } = require("../helpers/validations");
 
 const MAX_NUMBER_OF_FETCHED_BOOKS = 100;
 const MAX_NUMBER_OF_FETCHED_RELATED_BOOKS = 5;
@@ -51,13 +52,13 @@ exports.getBook = (req, res) => res.json(createBookForResponse(req.book));
 
 exports.createBook = (req, res) => {
     const { fields, files } = req;
-    const { title, author, category } = fields;
-
-    if (!title || !author || !category) {
-        return res.status(400).json({
-            error: "Debe especificar al menos un título, autor y categoría",
-        });
-    }
+    // const { title, author, category } = fields;
+    //
+    // if (!title || !author || !category) {
+    //     return res.status(400).json({
+    //         error: "Debe especificar al menos un título, autor y categoría",
+    //     });
+    // }
     let book = new Book(fields);
 
     setImageAsCover(book.coverImage, files.coverImage);
@@ -189,7 +190,7 @@ exports.validateUpsertForm = (req, res, next) => {
                     error: "La categoría enviada tiene un formato de id incorrecto",
                 });
             }
-            if (!(await categoryExists(category))) {
+            if (!(await existsInDatabase(category, Category))) {
                 return res.status(400).json({
                     error: "La categoría enviada no existe",
                 });
@@ -197,34 +198,29 @@ exports.validateUpsertForm = (req, res, next) => {
         }
 
         const { coverImage, backCoverImage } = files;
-        if (coverImage) {
-            if (!coverImage.size > 0) {
-                return res.status(400).json({
-                    error: "Se recibió una imagen nula",
-                });
-            }
-            if (coverImage.size > 1000000) {
-                return res.status(400).json({
-                    error: "La imagen es demasiado pesada",
-                });
-            }
+        const coverImageError = validateImage(coverImage);
+        if (coverImageError) {
+            return res.status(400).json(coverImageError);
         }
-        if (backCoverImage) {
-            if (!backCoverImage.size > 0) {
-                return res.status(400).json({
-                    error: "Se recibió una imagen nula",
-                });
-            }
-            if (backCoverImage.size > 1000000) {
-                return res.status(400).json({
-                    error: "La imagen es demasiado pesada",
-                });
-            }
+
+        const backCoverImageError = validateImage(backCoverImage);
+        if (backCoverImageError) {
+            return res.status(400).json(backCoverImageError);
         }
         req.fields = fields;
         req.files = files;
         next();
     });
+};
+
+exports.validateInsertRequiredFields = (req, res, next) => {
+    const { title, author, category } = req.fields;
+    if (!title || !author || !category) {
+        return res.status(400).json({
+            error: "Debe especificar al menos un título, autor y categoría",
+        });
+    }
+    next();
 };
 
 const addCategoriesToQuery = (query, req) => {
@@ -265,6 +261,6 @@ const setImageAsCover = (bookCover, image) => {
     }
 };
 
-const categoryExists = async (categoryId) => {
-    return !!(await Category.findById(categoryId));
-};
+// const categoryExists = async (categoryId) => {
+//     return !!(await Category.findById(categoryId));
+// };

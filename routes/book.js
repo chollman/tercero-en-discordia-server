@@ -17,7 +17,8 @@ const {
     getBooksBySearch,
     getRelatedBooks,
     getCategoriesInUse,
-    validateUpsertForm
+    validateUpsertForm,
+    validateInsertRequiredFields
 } = require("../controllers/book");
 const { userById } = require("../controllers/user");
 
@@ -28,7 +29,15 @@ router.get("/books/search", getBooksBySearch);
 router.get("/books/categories", getCategoriesInUse);
 router.get("/books/related/:bookId", getRelatedBooks);
 router.get("/books/:bookId", getBook);
-router.post("/books/:userId", requireAuth, isAuth, isAdmin, validateUpsertForm, createBook);
+router.post(
+    "/books/:userId",
+    requireAuth,
+    isAuth,
+    isAdmin,
+    validateUpsertForm,
+    validateInsertRequiredFields,
+    createBook
+);
 router.put("/books/:bookId/:userId", requireAuth, isAuth, isAdmin, validateUpsertForm, updateBook);
 router.delete("/books/:bookId/:userId", requireAuth, isAuth, isAdmin, deleteBook);
 
