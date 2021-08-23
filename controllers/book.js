@@ -33,7 +33,7 @@ exports.getAllBooks = (req, res) => {
         });
 };
 
-exports.getById = (req, res, next, id) => {
+exports.bookById = (req, res, next, id) => {
     Book.findById(id)
         .populate("category")
         .exec((err, book) => {

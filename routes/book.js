@@ -8,7 +8,7 @@ const { isAuth, isAdmin } = require("../controllers/authentication");
 const {
     getAllBooks,
     createBook,
-    getById,
+    bookById,
     getBook,
     deleteBook,
     updateBook,
@@ -36,6 +36,6 @@ router.get("/books/cover/:bookId", getCover);
 router.get("/books/backcover/:bookId", getBackCover);
 
 router.param("userId", userById);
-router.param("bookId", getById);
+router.param("bookId", bookById);
 
 module.exports = router;
