@@ -12,7 +12,7 @@ const {
     updateAuthor,
     deleteAuthor,
     getAuthorPhoto,
-    getAuthor
+    getAuthor,
 } = require("../controllers/author");
 const { userById } = require("../controllers/user");
 const { validateFormStatus, validateFieldsNotNull, validateImage } = require("../helpers/validations");
@@ -27,7 +27,7 @@ router.post(
     isAuth,
     isAdmin,
     validateFormStatus,
-    validateFieldsNotNull(["name", "biography"], "Debe especificar al menos un nombre y biografía"),
+    validateFieldsNotNull(["name"], "Debe especificar al menos un nombre"),
     validateImage("photo"),
     createAuthor
 );
