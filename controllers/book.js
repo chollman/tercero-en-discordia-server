@@ -18,7 +18,8 @@ exports.getAllBooks = (req, res) => {
     addCategoriesToQuery(query, req);
 
     Book.find(query)
-        .populate("category")
+        .populate("categories")
+        .populate("authors", "-photo")
         .sort([[sortBy, order]])
         .limit(limit)
         .exec((err, data) => {
@@ -33,7 +34,8 @@ exports.getAllBooks = (req, res) => {
 
 exports.bookById = (req, res, next, id) => {
     Book.findById(id)
-        .populate("category")
+        .populate("categories")
+        .populate("authors", "-photo")
         .exec((err, book) => {
             if (err || !book) {
                 return res.status(404).json({
@@ -47,32 +49,34 @@ exports.bookById = (req, res, next, id) => {
 
 exports.getBook = (req, res) => res.json(createBookForResponse(req.book));
 
-exports.createBook = (req, res) => {
+exports.createBook = async (req, res) => {
     const { fields, files } = req;
     let book = new Book(fields);
     setCoversInBook(book, files);
-    book.save((err, result) => {
+    await book.save((err) => {
         if (err) {
             return res.status(400).json({
                 error: errorHandler(err),
             });
         }
-        res.status(201).json(createBookForResponse(result));
     });
+    await book.populate("categories").populate("authors", "-photo").execPopulate();
+    res.status(201).json(createBookForResponse(book));
 };
 
-exports.updateBook = (req, res) => {
+exports.updateBook = async (req, res) => {
     const { fields, files } = req;
     let book = _.extend(req.book, fields);
     setCoversInBook(book, files);
-    book.save((err, result) => {
+    await book.save((err) => {
         if (err) {
             return res.status(400).json({
                 error: errorHandler(err),
             });
         }
-        res.json(createBookForResponse(result));
     });
+    await book.populate("categories").populate("authors", "-photo").execPopulate();
+    res.status(201).json(createBookForResponse(book));
 };
 
 exports.deleteBook = (req, res) => {
@@ -120,7 +124,9 @@ exports.getBooksBySearch = (req, res) => {
             });
         }
         res.json(books.map(createBookForResponse));
-    }).populate("category");
+    })
+        .populate("categories")
+        .populate("authors", "-photo");
 };
 
 exports.getRelatedBooks = (req, res) => {
@@ -128,7 +134,8 @@ exports.getRelatedBooks = (req, res) => {
 
     Book.find({ _id: { $ne: req.book }, category: req.book.category })
         .limit(limit)
-        .populate("category")
+        .populate("categories")
+        .populate("authors", "-photo")
         .exec((err, books) => {
             if (err) {
                 return res.status(400).json({
@@ -140,7 +147,7 @@ exports.getRelatedBooks = (req, res) => {
 };
 
 exports.getCategoriesInUse = (req, res) => {
-    Book.distinct("category", {}, (err, categoryIds) => {
+    Book.distinct("categories", {}, (err, categoryIds) => {
         if (err) {
             return res.status(400).json({
                 error: errorHandler(err),

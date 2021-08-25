@@ -5,6 +5,7 @@ require("../services/passport");
 const passport = require("passport");
 
 const Category = require("../models/category");
+const Author = require("../models/author");
 
 const { isAuth, isAdmin } = require("../controllers/authentication");
 const {
@@ -25,7 +26,7 @@ const {
     validateFormStatus,
     validateImage,
     validateFieldsNotNull,
-    validateObjectId,
+    validateObjectIdArray,
 } = require("../helpers/validations");
 
 const requireAuth = passport.authenticate("jwt", { session: false });
@@ -41,10 +42,11 @@ router.post(
     isAuth,
     isAdmin,
     validateFormStatus,
-    validateFieldsNotNull(["author", "title", "category"], "Debe especificar al menos un título, autor y categoría"),
+    validateFieldsNotNull(["authors", "title", "categories"], "Debe especificar al menos un título, autor y categoría"),
     validateImage("coverImage"),
     validateImage("backCoverImage"),
-    validateObjectId("category", Category),
+    validateObjectIdArray("categories", Category),
+    validateObjectIdArray("authors", Author),
     createBook
 );
 router.put(
@@ -55,7 +57,8 @@ router.put(
     validateFormStatus,
     validateImage("coverImage"),
     validateImage("backCoverImage"),
-    validateObjectId("category", Category),
+    validateObjectIdArray("categories", Category),
+    validateObjectIdArray("authors", Author),
     updateBook
 );
 router.delete("/books/:bookId/:userId", requireAuth, isAuth, isAdmin, deleteBook);
