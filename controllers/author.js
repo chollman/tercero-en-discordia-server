@@ -96,11 +96,8 @@ const createAuthorForResponse = (author) => {
     return authorForResponse;
 };
 
-const removePhoto = (author) => {
-    author.photo = undefined;
-};
+const removePhoto = (author) => (author.photo = undefined);
 
-const setPhotoStatus = (author) => {
-    author.hasPhoto = !!author.photo;
-};
+const setPhotoStatus = (author) => (author.hasPhoto = !!author.photo);
+
 const setPhotoOfAuthor = (author, files) => setImageInObject(author.photo, files.photo);

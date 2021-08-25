@@ -14,7 +14,7 @@ const {
     deleteCategory,
 } = require("../controllers/category");
 const { userById } = require("../controllers/user");
-const { validateFieldsNotNull, validateFormStatus } = require("../helpers/validations");
+const { validateFieldsNotNull, validateSimpleRequest } = require("../helpers/validations");
 
 const requireAuth = passport.authenticate("jwt", { session: false });
 
@@ -28,7 +28,7 @@ router.post(
     requireAuth,
     isAuth,
     isAdmin,
-    validateFormStatus,
+    validateSimpleRequest,
     validateFieldsNotNull(["name"]),
     createCategory
 );
@@ -37,7 +37,7 @@ router.put(
     requireAuth,
     isAuth,
     isAdmin,
-    validateFormStatus,
+    validateSimpleRequest,
     validateFieldsNotNull(["name"]),
     updateCategory
 );

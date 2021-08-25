@@ -20,6 +20,11 @@ exports.validateFormStatus = async (req, res, next) => {
     next();
 };
 
+exports.validateSimpleRequest = (req, res, next) => {
+    req.fields = req.body;
+    next();
+}
+
 exports.validateFieldsNotNull = (arrayOfFields, errorMsg) => (req, res, next) => {
     if (!arrayOfFields.every((elem) => !!req.fields[elem])) {
         return res.status(400).json({

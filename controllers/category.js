@@ -35,7 +35,7 @@ exports.createCategory = async (req, res) => {
                 error: errorHandler(err),
             });
         }
-        return res.status(401).json(result);
+        return res.status(201).json(result);
     });
 };
 
