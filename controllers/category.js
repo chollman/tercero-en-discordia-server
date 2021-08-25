@@ -1,6 +1,6 @@
 const Category = require("../models/category");
-const { errorHandler } = require("../helpers/dbErrorHandler");
 const Book = require("../models/book");
+const { errorHandler } = require("../helpers/dbErrorHandler");
 
 exports.getAllCategories = (req, res) => {
     Category.find().exec((err, data) => {

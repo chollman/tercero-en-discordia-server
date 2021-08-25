@@ -1,4 +1,5 @@
 const Author = require("../models/author");
+const Book = require("../models/book");
 const { errorHandler } = require("../helpers/dbErrorHandler");
 const { setImageInObject } = require("../helpers/utils");
 const _ = require("lodash");
@@ -66,8 +67,17 @@ exports.updateAuthor = (req, res) => {
     });
 };
 
-exports.deleteAuthor = (req, res) => {
+exports.deleteAuthor = async (req, res) => {
     let author = req.author;
+    const authorIdsInUse = await Book.distinct("authors", {});
+    const authorsInUse = await Author.find({ _id: { $in: authorIdsInUse } });
+    for (let authorInUse of authorsInUse) {
+        if (authorInUse.id === author.id) {
+            return res.status(400).json({
+                error: "No se puede borrar el autor ya que está referenciando al menos un libro",
+            });
+        }
+    }
     author.remove((err, deletedAuthor) => {
         if (err) {
             return res.status(400).json({
