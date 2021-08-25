@@ -3,7 +3,7 @@ const { Schema, ObjectId } = mongoose;
 
 const bookSchema = new Schema(
     {
-        title: { type: String, trim: true, required: true },
+        title: { type: String, trim: true, required: true, unique: true },
         description: { type: String, trim: true },
         authors: [{ type: ObjectId, ref: "authors" }],
         isbn: { type: String, trim: true },
