@@ -1,7 +1,8 @@
 const Category = require("../models/category");
 const { errorHandler } = require("../helpers/dbErrorHandler");
+const Book = require("../models/book");
 
-exports.getAllCategories = (req, res, next) => {
+exports.getAllCategories = (req, res) => {
     Category.find().exec((err, data) => {
         if (err) {
             return res.status(400).json({
@@ -24,38 +25,45 @@ exports.catById = (req, res, next, id) => {
     });
 };
 
-exports.getCategory = (req, res, next) => {
-    return res.json(req.category);
-};
+exports.getCategory = (req, res) => res.json(req.category);
 
-exports.createCategory = (req, res, next) => {
-    const category = new Category(req.body);
-    category.save((err, data) => {
+exports.createCategory = async (req, res) => {
+    const category = new Category(req.fields);
+    await category.save((err, result) => {
         if (err) {
             return res.status(400).json({
                 error: errorHandler(err),
             });
         }
-        res.json({ data });
+        return res.status(401).json(result);
     });
 };
 
-exports.updateCategory = (req, res, next) => {
+exports.updateCategory = async (req, res) => {
     const category = req.category;
     category.name = req.body.name;
-    category.save((err, data) => {
+    await category.save((err, result) => {
         if (err) {
             return res.status(400).json({
                 error: errorHandler(err),
             });
         }
-        res.json(data);
+        return res.json(result);
     });
 };
 
-exports.deleteCategory = (req, res, next) => {
+exports.deleteCategory = async (req, res) => {
     const category = req.category;
-    category.remove((err, data) => {
+    const categoryIdsInUse = await Book.distinct("categories", {});
+    const categoriesInUse = await Category.find({ _id: { $in: categoryIdsInUse } });
+    for (let categoryInUse of categoriesInUse) {
+        if (categoryInUse.id === category.id) {
+            return res.status(400).json({
+                error: "No se puede borrar la categoría ya que está referenciando al menos un libro",
+            });
+        }
+    }
+    category.remove((err) => {
         if (err) {
             return res.status(400).json({
                 error: errorHandler(err),
