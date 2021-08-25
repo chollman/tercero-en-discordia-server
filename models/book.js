@@ -5,11 +5,11 @@ const bookSchema = new Schema(
     {
         title: { type: String, trim: true, required: true },
         description: { type: String, trim: true },
-        author: { type: String, trim: true, required: true },
+        authors: [{ type: ObjectId, ref: "authors" }],
         isbn: { type: String, trim: true },
         numberOfPages: { type: Number },
         publicationDate: { type: Date },
-        category: { type: ObjectId, ref: "categories", required: true },
+        categories: [{ type: ObjectId, ref: "categories", required: true }],
         coverImage: { data: Buffer, contentType: String },
         backCoverImage: { data: Buffer, contentType: String },
         linkToEbook: { type: String, trim: true },

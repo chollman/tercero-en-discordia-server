@@ -2,8 +2,8 @@ const formidable = require("formidable");
 const mongoose = require("mongoose");
 
 exports.validateFormStatus = async (req, res, next) => {
-    let form = new formidable.IncomingForm();
-    form.keepExtensions = true;
+    let form = formidable({ multiples: true, keepExtensions: true });
+
     await new Promise((resolve) => {
         form.parse(req, (err, fields, files) => {
             if (err) {
@@ -32,15 +32,32 @@ exports.validateFieldsNotNull = (arrayOfFields, errorMsg) => (req, res, next) =>
 exports.validateObjectId = (objectIdField, mongooseModel) => async (req, res, next) => {
     if (req.fields[objectIdField]) {
         const objectId = req.fields[objectIdField];
-        if (!mongoose.Types.ObjectId.isValid(objectId)) {
+        const validationError = await isValidObjectId(objectId, mongooseModel, objectIdField);
+        if (validationError) {
+            return res.status(400).json(validationError);
+        }
+    }
+    next();
+};
+
+exports.validateObjectIdArray = (objectIdArrayField, mongooseModel) => async (req, res, next) => {
+    if (req.fields[objectIdArrayField]) {
+        const objectIdArray = req.fields[objectIdArrayField];
+        if (!objectIdArray.length) {
             return res.status(400).json({
-                error: `Se envío un formato de id incorrecto: ${objectIdField}`,
+                error: `El array de ids no puede ser vacío: ${objectIdArrayField}`,
             });
         }
-        if (!(await existsInDatabase(objectId, mongooseModel))) {
+        if (objectIdArray.length !== new Set(objectIdArray).size) {
             return res.status(400).json({
-                error: `El id no existe en la base de datos: ${objectIdField}`,
+                error: `El array de ids no puede tener duplicados: ${objectIdArrayField}`,
             });
+        }
+        for (let objectId of objectIdArray) {
+            const validationError = await isValidObjectId(objectId, mongooseModel, objectIdArrayField);
+            if (validationError) {
+                return res.status(400).json(validationError);
+            }
         }
     }
     next();
@@ -65,4 +82,18 @@ exports.validateImage = (imageField) => (req, res, next) => {
 
 const existsInDatabase = async (id, mongooseModel) => {
     return !!(await mongooseModel.findById(id));
+};
+
+const isValidObjectId = async (objectId, mongooseModel, errorField) => {
+    if (!mongoose.Types.ObjectId.isValid(objectId)) {
+        return {
+            error: `Se envío un formato de id incorrecto: ${errorField}`,
+        };
+    }
+    if (!(await existsInDatabase(objectId, mongooseModel))) {
+        return {
+            error: `El id no existe en la base de datos: ${errorField}`,
+        };
+    }
+    return null;
 };
