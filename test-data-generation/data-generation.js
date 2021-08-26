@@ -3,6 +3,7 @@ const keys = require("../config/keys");
 const Category = require("../models/category");
 const Author = require("../models/author");
 const Book = require("../models/book");
+const BlogCategory = require("../models/blogCategory");
 const fs = require("fs");
 const _ = require("lodash");
 
@@ -196,9 +197,14 @@ mongoose
         console.log("DB Connected");
         console.log("==! Start dropping Collections !==");
 
-        await mongoose.connection.db.dropCollection("books");
-        await mongoose.connection.db.dropCollection("categories");
-        await mongoose.connection.db.dropCollection("authors");
+        try {
+            await mongoose.connection.db.dropCollection("books");
+            await mongoose.connection.db.dropCollection("categories");
+            await mongoose.connection.db.dropCollection("authors");
+            await mongoose.connection.db.dropCollection("blog-categories");
+        } catch (e) {
+            console.error(e);
+        }
 
         console.log("==! Done dropping Collections !==");
 
@@ -227,8 +233,14 @@ mongoose
             let dbBook = new Book(book);
             await dbBook.save();
         }
-
         console.log("===== Done saving books =====");
+
+        console.log("===== Start saving Blog categories =====");
+        for (let blogCategory of categoriesArray) {
+            let dbBlogCategory = new BlogCategory(blogCategory);
+            await dbBlogCategory.save();
+        }
+        console.log("===== Done saving Blog categories =====");
 
         await mongoose.disconnect();
         console.log("DONE!");

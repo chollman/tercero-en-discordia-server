@@ -13,6 +13,7 @@ const booksRoutes = require("./routes/book");
 const categoryRoutes = require("./routes/category");
 const userRoutes = require("./routes/user");
 const authorRoutes = require("./routes/author");
+const blogCategoryRoutes = require("./routes/blogCategory");
 const app = express();
 
 mongoose
@@ -33,6 +34,7 @@ app.use("/api", booksRoutes);
 app.use("/api", categoryRoutes);
 app.use("/api", userRoutes);
 app.use("/api", authorRoutes);
+app.use("/api", blogCategoryRoutes);
 
 const PORT = process.env.PORT || 5000;
 

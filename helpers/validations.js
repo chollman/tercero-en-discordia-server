@@ -1,5 +1,6 @@
 const formidable = require("formidable");
 const mongoose = require("mongoose");
+const _ = require("lodash");
 
 exports.validateFormStatus = async (req, res, next) => {
     let form = formidable({ multiples: true, keepExtensions: true });
@@ -21,9 +22,14 @@ exports.validateFormStatus = async (req, res, next) => {
 };
 
 exports.validateSimpleRequest = (req, res, next) => {
+    if (!req.body || _.isEmpty(req.body)) {
+        return res.status(400).json({
+            error: "No se recibió un body en la request",
+        });
+    }
     req.fields = req.body;
     next();
-}
+};
 
 exports.validateUserSignup = (req, res, next) => {
     req.check("email")
@@ -38,7 +44,6 @@ exports.validateUserSignup = (req, res, next) => {
     }
     next();
 };
-
 
 exports.validateFieldsNotNull = (arrayOfFields, errorMsg) => (req, res, next) => {
     if (!arrayOfFields.every((elem) => !!req.fields[elem])) {
