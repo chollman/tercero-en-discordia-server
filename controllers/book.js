@@ -53,30 +53,30 @@ exports.createBook = async (req, res) => {
     const { fields, files } = req;
     let book = new Book(fields);
     setCoversInBook(book, files);
-    await book.save(async (err) => {
-        if (err) {
-            return res.status(400).json({
-                error: errorHandler(err),
-            });
-        }
+    try {
+        await book.save();
         await book.populate("categories").populate("authors", "-photo").execPopulate();
         res.status(201).json(createBookForResponse(book));
-    });
+    } catch (err) {
+        return res.status(400).json({
+            error: errorHandler(err),
+        });
+    }
 };
 
 exports.updateBook = async (req, res) => {
     const { fields, files } = req;
     let book = _.extend(req.book, fields);
     setCoversInBook(book, files);
-    await book.save(async (err) => {
-        if (err) {
-            return res.status(400).json({
-                error: errorHandler(err),
-            });
-        }
+    try {
+        await book.save();
         await book.populate("categories").populate("authors", "-photo").execPopulate();
-        res.status(201).json(createBookForResponse(book));
-    });
+        res.status(200).json(createBookForResponse(book));
+    } catch (err) {
+        return res.status(400).json({
+            error: errorHandler(err),
+        });
+    }
 };
 
 exports.deleteBook = (req, res) => {
