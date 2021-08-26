@@ -27,9 +27,9 @@ exports.catById = (req, res, next, id) => {
 
 exports.getCategory = (req, res) => res.json(req.category);
 
-exports.createCategory = async (req, res) => {
+exports.createCategory = (req, res) => {
     const category = new Category(req.fields);
-    await category.save((err, result) => {
+    category.save((err, result) => {
         if (err) {
             return res.status(400).json({
                 error: errorHandler(err),
@@ -39,10 +39,10 @@ exports.createCategory = async (req, res) => {
     });
 };
 
-exports.updateCategory = async (req, res) => {
+exports.updateCategory = (req, res) => {
     const category = req.category;
     category.name = req.body.name;
-    await category.save((err, result) => {
+    category.save((err, result) => {
         if (err) {
             return res.status(400).json({
                 error: errorHandler(err),
