@@ -12,7 +12,6 @@ exports.getAllAuthors = (req, res) => {
     let limit = req.query.limit ? parseInt(req.query.limit) : MAX_NUMBER_OF_FETCHED_AUTHORS;
 
     Author.find()
-        .populate("category")
         .sort([[sortBy, order]])
         .limit(limit)
         .exec((err, data) => {
