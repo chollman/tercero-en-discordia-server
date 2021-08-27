@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const expressValidator = require("express-validator");
-const keys = require("./config/keys");
+const keys = require("../config/keys");
 const cors = require("cors");
 
 // IMPORT ROUTES
