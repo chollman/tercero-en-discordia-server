@@ -1,6 +1,6 @@
 const BlogCategory = require("../models/blogCategory");
 const { errorHandler } = require("../helpers/dbErrorHandler");
-
+// TODO DELETE FILE, NO LONGER NEEDED
 exports.getAllBlogCategories = (req, res) => {
     BlogCategory.find().exec((err, data) => {
         if (err) {
