@@ -41,18 +41,18 @@ exports.createObject = (mongooseModel) => async (req, res) => {
     const dbObject = new mongooseModel(req.fields);
     const error = await saveInDB(dbObject);
     if (error) {
-        res.status(400).json(error);
+        return res.status(400).json(error);
     }
-    res.status(201).json(dbObject);
+    return res.status(201).json(dbObject);
 };
 
 exports.updateObject = async (req, res) => {
     let dbObject = _.extend(req.reqDbObject, req.fields);
     const error = await saveInDB(dbObject);
     if (error) {
-        res.status(400).json(error);
+        return res.status(400).json(error);
     }
-    res.status(200).json(dbObject);
+    return res.status(200).json(dbObject);
 };
 
 exports.deleteObject = (successMessage) => (req, res) => {

@@ -1,14 +1,15 @@
 const { errorHandler } = require("../helpers/dbErrorHandler");
 
 exports.saveInDB = async (dbObject) => {
+    let error = null;
     try {
         await dbObject.save();
     } catch (err) {
-        return {
+        error = {
             error: errorHandler(err),
         };
     }
-    return null;
+    return error;
 };
 
 exports.deleteFromDBWithResponse = (dbObject, res, successMessage) => {
@@ -18,6 +19,6 @@ exports.deleteFromDBWithResponse = (dbObject, res, successMessage) => {
                 error: errorHandler(err),
             });
         }
-        res.json({ message: successMessage });
+        return res.json({ message: successMessage });
     });
 };
