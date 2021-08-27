@@ -14,6 +14,7 @@ const categoryRoutes = require("./routes/category");
 const userRoutes = require("./routes/user");
 const authorRoutes = require("./routes/author");
 const blogCategoryRoutes = require("./routes/blogCategory");
+const blogTagRoutes = require("./routes/blogTag");
 const app = express();
 
 mongoose
@@ -35,6 +36,7 @@ app.use("/api", categoryRoutes);
 app.use("/api", userRoutes);
 app.use("/api", authorRoutes);
 app.use("/api", blogCategoryRoutes);
+app.use("/api", blogTagRoutes);
 
 const PORT = process.env.PORT || 5000;
 
