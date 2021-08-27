@@ -1,11 +1,14 @@
 const mongoose = require("mongoose");
 const keys = require("../config/keys");
-const Category = require("../models/category");
-const Author = require("../models/author");
-const Book = require("../models/book");
-const BlogCategory = require("../models/blogCategory");
+const Category = require("../src/models/category");
+const Author = require("../src/models/author");
+const Book = require("../src/models/book");
+const BlogCategory = require("../src/models/blogCategory");
+const BlogTag = require("../src/models/BlogTag");
 const fs = require("fs");
 const _ = require("lodash");
+
+// RUN THE SCRIPT WITH NODE
 
 // DECLARE OBJECTS TO INSERT IN THE DB
 
@@ -241,6 +244,13 @@ mongoose
             await dbBlogCategory.save();
         }
         console.log("===== Done saving Blog categories =====");
+
+        console.log("===== Start saving Blog tags =====");
+        for (let blogTag of categoriesArray) {
+            let dbBlogTag = new BlogTag(blogTag);
+            await dbBlogTag.save();
+        }
+        console.log("===== Done saving Blog tags =====");
 
         await mongoose.disconnect();
         console.log("DONE!");
