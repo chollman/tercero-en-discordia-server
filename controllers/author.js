@@ -26,18 +26,26 @@ exports.getAllAuthors = (req, res) => {
 
 exports.getAuthor = (req, res) => res.json(createAuthorForResponse(req.reqDbObject));
 
-exports.createAuthor = (req, res) => {
+exports.createAuthor = async (req, res) => {
     const { fields, files } = req;
     let author = new Author(fields);
     setPhotoOfAuthor(author, files);
-    saveInDB(author, res, 201);
+    const error = await saveInDB(author);
+    if (error) {
+        res.status(400).json(error);
+    }
+    res.status(201).json(createAuthorForResponse(author));
 };
 
-exports.updateAuthor = (req, res) => {
+exports.updateAuthor = async (req, res) => {
     const { fields, files } = req;
     let author = _.extend(req.reqDbObject, fields);
     setPhotoOfAuthor(author, files);
-    saveInDB(author, res, 200);
+    const error = await saveInDB(author);
+    if (error) {
+        res.status(400).json(error);
+    }
+    res.status(200).json(createAuthorForResponse(author));
 };
 
 exports.getAuthorPhoto = (req, res, next) => {

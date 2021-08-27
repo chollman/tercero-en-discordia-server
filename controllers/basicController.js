@@ -1,5 +1,5 @@
 const { errorHandler } = require("../helpers/dbErrorHandler");
-const { saveInDB, deleteFromDB } = require("../helpers/dbHelper");
+const { saveInDB, deleteFromDBWithResponse } = require("../helpers/dbHelper");
 const _ = require("lodash");
 
 exports.getAllObjects = (mongooseModel) => (req, res) => {
@@ -38,17 +38,25 @@ exports.getObjectById = (mongooseModel, errorMessage) => (req, res, next, id) =>
 
 exports.getObject = (req, res) => res.json(req.reqDbObject);
 
-exports.createObject = (mongooseModel) => (req, res) => {
+exports.createObject = (mongooseModel) => async (req, res) => {
     const dbObject = new mongooseModel(req.fields);
-    saveInDB(dbObject, res, 201);
+    const error = await saveInDB(dbObject);
+    if (error) {
+        res.status(400).json(error);
+    }
+    res.status(201).json(dbObject);
 };
 
-exports.updateObject = (req, res) => {
+exports.updateObject = async (req, res) => {
     let dbObject = _.extend(req.reqDbObject, req.fields);
-    saveInDB(dbObject, res, 200);
+    const error = await saveInDB(dbObject);
+    if (error) {
+        res.status(400).json(error);
+    }
+    res.status(200).json(dbObject);
 };
 
-exports.deleteObject = (successMessage) => async (req, res) => {
+exports.deleteObject = (successMessage) => (req, res) => {
     const dbObject = req.reqDbObject;
-    deleteFromDB(dbObject, res, successMessage);
+    deleteFromDBWithResponse(dbObject, res, successMessage);
 };

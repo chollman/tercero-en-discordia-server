@@ -32,22 +32,7 @@ exports.getAllBooks = (req, res) => {
         });
 };
 
-exports.bookById = (req, res, next, id) => {
-    Book.findById(id)
-        .populate("categories")
-        .populate("authors", "-photo")
-        .exec((err, book) => {
-            if (err || !book) {
-                return res.status(404).json({
-                    error: "El libro no existe",
-                });
-            }
-            req.book = book;
-            next();
-        });
-};
-
-exports.getBook = (req, res) => res.json(createBookForResponse(req.book));
+exports.getBook = (req, res) => res.json(createBookForResponse(req.reqDbObject));
 
 exports.createBook = async (req, res) => {
     const { fields, files } = req;
@@ -66,7 +51,7 @@ exports.createBook = async (req, res) => {
 
 exports.updateBook = async (req, res) => {
     const { fields, files } = req;
-    let book = _.extend(req.book, fields);
+    let book = _.extend(req.reqDbObject, fields);
     setCoversInBook(book, files);
     try {
         await book.save();
@@ -79,33 +64,11 @@ exports.updateBook = async (req, res) => {
     }
 };
 
-exports.deleteBook = (req, res) => {
-    let book = req.book;
-    book.remove((err, deletedBook) => {
-        if (err) {
-            return res.status(400).json({
-                error: errorHandler(err),
-            });
-        }
-        console.log(`book: ${deletedBook.id} was deleted by user: ${req.profile.email} `);
-        res.json({
-            message: "El libro fue borrado correctamente",
-        });
-    });
-};
-
-exports.getCover = (req, res, next) => {
-    if (req.book.coverImage.data) {
-        res.set("Content-Type", req.book.coverImage.contentType);
-        return res.send(req.book.coverImage.data);
-    }
-    next();
-};
-
-exports.getBackCover = (req, res, next) => {
-    if (req.book.backCoverImage.data) {
-        res.set("Content-Type", req.book.backCoverImage.contentType);
-        return res.send(req.book.backCoverImage.data);
+exports.getCover = (coverField) => (req, res, next) => {
+    const book = req.reqDbObject;
+    if (book[coverField].data) {
+        res.set("Content-Type", book[coverField].contentType);
+        return res.send(book[coverField].data);
     }
     next();
 };
@@ -131,8 +94,9 @@ exports.getBooksBySearch = (req, res) => {
 
 exports.getRelatedBooks = (req, res) => {
     let limit = req.query.limit ? parseInt(req.query.limit) : MAX_NUMBER_OF_FETCHED_RELATED_BOOKS;
+    const book = req.reqDbObject;
 
-    Book.find({ _id: { $ne: req.book }, category: req.book.category })
+    Book.find({ _id: { $ne: book }, category: book.category })
         .limit(limit)
         .populate("categories")
         .populate("authors", "-photo")
