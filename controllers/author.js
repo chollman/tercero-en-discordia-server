@@ -1,6 +1,6 @@
 const Author = require("../models/author");
-const Book = require("../models/book");
 const { errorHandler } = require("../helpers/dbErrorHandler");
+const { saveInDB } = require("../helpers/dbHelper");
 const { setImageInObject } = require("../helpers/utils");
 const _ = require("lodash");
 
@@ -24,76 +24,27 @@ exports.getAllAuthors = (req, res) => {
         });
 };
 
-exports.authorById = (req, res, next, id) => {
-    Author.findById(id).exec((err, author) => {
-        if (err || !author) {
-            return res.status(404).json({
-                error: "El autor no existe",
-            });
-        }
-        req.author = author;
-        next();
-    });
-};
-
-exports.getAuthor = (req, res) => res.json(createAuthorForResponse(req.author));
+exports.getAuthor = (req, res) => res.json(createAuthorForResponse(req.reqDbObject));
 
 exports.createAuthor = (req, res) => {
     const { fields, files } = req;
     let author = new Author(fields);
     setPhotoOfAuthor(author, files);
-    author.save((err, result) => {
-        if (err) {
-            return res.status(400).json({
-                error: errorHandler(err),
-            });
-        }
-        res.status(201).json(createAuthorForResponse(result));
-    });
+    saveInDB(author, res, 201);
 };
 
 exports.updateAuthor = (req, res) => {
     const { fields, files } = req;
-    let author = _.extend(req.author, fields);
+    let author = _.extend(req.reqDbObject, fields);
     setPhotoOfAuthor(author, files);
-    author.save((err, result) => {
-        if (err) {
-            return res.status(400).json({
-                error: errorHandler(err),
-            });
-        }
-        res.status(200).json(createAuthorForResponse(result));
-    });
-};
-
-exports.deleteAuthor = async (req, res) => {
-    let author = req.author;
-    const authorIdsInUse = await Book.distinct("authors", {});
-    const authorsInUse = await Author.find({ _id: { $in: authorIdsInUse } });
-    for (let authorInUse of authorsInUse) {
-        if (authorInUse.id === author.id) {
-            return res.status(400).json({
-                error: "No se puede borrar el autor ya que está referenciando al menos un libro",
-            });
-        }
-    }
-    author.remove((err, deletedAuthor) => {
-        if (err) {
-            return res.status(400).json({
-                error: errorHandler(err),
-            });
-        }
-        console.log(`author: ${deletedAuthor.id} was deleted by user: ${req.profile.email} `);
-        res.json({
-            message: "El autor fue borrado correctamente",
-        });
-    });
+    saveInDB(author, res, 200);
 };
 
 exports.getAuthorPhoto = (req, res, next) => {
-    if (req.author.photo.data) {
-        res.set("Content-Type", req.author.photo.contentType);
-        return res.send(req.author.photo.data);
+    const author = req.reqDbObject;
+    if (author.photo.data) {
+        res.set("Content-Type", author.photo.contentType);
+        return res.send(author.photo.data);
     }
     next();
 };

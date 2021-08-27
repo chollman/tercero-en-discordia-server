@@ -4,20 +4,24 @@ const router = express.Router();
 require("../services/passport");
 const passport = require("passport");
 
+const Author = require("../models/author");
+const Book = require("../models/book");
+
 const { isAuth, isAdmin } = require("../controllers/authentication");
-const {
-    getAllAuthors,
-    authorById,
-    createAuthor,
-    updateAuthor,
-    deleteAuthor,
-    getAuthorPhoto,
-    getAuthor,
-} = require("../controllers/author");
+const { getAllAuthors, createAuthor, updateAuthor, getAuthorPhoto, getAuthor } = require("../controllers/author");
+const { getObjectById, deleteObject } = require("../controllers/basicController");
 const { userById } = require("../controllers/user");
-const { validateFormStatus, validateFieldsNotNull, validateImage } = require("../helpers/validations");
+const {
+    validateFormStatus,
+    validateFieldsNotNull,
+    validateImage,
+    validateNoReferences,
+} = require("../helpers/validations");
 
 const requireAuth = passport.authenticate("jwt", { session: false });
+
+router.param("authorId", getObjectById(Author, "El autor no existe"));
+router.param("userId", userById);
 
 router.get("/authors", getAllAuthors);
 router.get("/authors/:authorId", getAuthor);
@@ -40,11 +44,20 @@ router.put(
     validateImage("photo"),
     updateAuthor
 );
-router.delete("/authors/:authorId/:userId", requireAuth, isAuth, isAdmin, deleteAuthor);
+router.delete(
+    "/authors/:authorId/:userId",
+    requireAuth,
+    isAuth,
+    isAdmin,
+    validateNoReferences(
+        Author,
+        "authors",
+        Book,
+        "No se puede borrar el autor ya que está referenciando al menos un libro"
+    ),
+    deleteObject("El autor fue borrado correctamente")
+);
 
 router.get("/authors/photo/:authorId", getAuthorPhoto);
-
-router.param("userId", userById);
-router.param("authorId", authorById);
 
 module.exports = router;
