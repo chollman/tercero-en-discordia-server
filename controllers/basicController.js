@@ -19,7 +19,6 @@ exports.getAllObjects = (mongooseModel) => (req, res) => {
  * for all functions. So instead of having req.category or req.book, we have req.reqDbObject, and we can
  * use this to easy access on helpers and validations, otherwise we need to pass as parameter the name of the key
  * (category or book, for example)
- * @param objectName The name of the object, for example category or blogCategory
  * @param mongooseModel
  * @param errorMessage
  * @returns {(function(*, *, *, *=): void)|*}
