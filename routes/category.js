@@ -4,25 +4,28 @@ const router = express.Router();
 require("../services/passport");
 const passport = require("passport");
 
+const Category = require("../models/category");
+const Book = require("../models/book");
+
 const { isAuth, isAdmin } = require("../controllers/authentication");
 const {
-    getAllCategories,
-    catById,
-    createCategory,
-    getCategory,
-    updateCategory,
-    deleteCategory,
-} = require("../controllers/category");
+    getAllObjects,
+    getObjectById,
+    getObject,
+    createObject,
+    updateObject,
+    deleteObject,
+} = require("../controllers/basicController");
 const { userById } = require("../controllers/user");
-const { validateFieldsNotNull, validateSimpleRequest } = require("../helpers/validations");
+const { validateFieldsNotNull, validateSimpleRequest, validateNoReferences } = require("../helpers/validations");
 
 const requireAuth = passport.authenticate("jwt", { session: false });
 
-router.param("categoryId", catById);
+router.param("categoryId", getObjectById(Category, "La categoría no existe"));
 router.param("userId", userById);
 
-router.get("/categories", getAllCategories);
-router.get("/categories/:categoryId", getCategory);
+router.get("/categories", getAllObjects(Category));
+router.get("/categories/:categoryId", getObject);
 router.post(
     "/categories/:userId",
     requireAuth,
@@ -30,7 +33,7 @@ router.post(
     isAdmin,
     validateSimpleRequest,
     validateFieldsNotNull(["name"]),
-    createCategory
+    createObject(Category)
 );
 router.put(
     "/categories/:categoryId/:userId",
@@ -39,8 +42,20 @@ router.put(
     isAdmin,
     validateSimpleRequest,
     validateFieldsNotNull(["name"]),
-    updateCategory
+    updateObject
 );
-router.delete("/categories/:categoryId/:userId", requireAuth, isAuth, isAdmin, deleteCategory);
+router.delete(
+    "/categories/:categoryId/:userId",
+    requireAuth,
+    isAuth,
+    isAdmin,
+    validateNoReferences(
+        Category,
+        "categories",
+        Book,
+        "No se puede borrar la categoría ya que está referenciando al menos un libro"
+    ),
+    deleteObject("La categoría se eliminó correctamente")
+);
 
 module.exports = router;

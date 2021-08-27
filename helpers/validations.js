@@ -105,6 +105,24 @@ exports.validateImage = (imageField) => (req, res, next) => {
     next();
 };
 
+exports.validateNoReferences = (mongooseModel, foreignKey, foreignKeyMongooseModel, errorMessage) => async (
+    req,
+    res,
+    next
+) => {
+    const object = req.reqDbObject;
+    const idsInUse = await foreignKeyMongooseModel.distinct(foreignKey);
+    const objectsInUse = await mongooseModel.find({ _id: { $in: idsInUse } });
+    for (let objectInUse of objectsInUse) {
+        if (objectInUse.id === object.id) {
+            return res.status(400).json({
+                error: errorMessage,
+            });
+        }
+    }
+    next();
+};
+
 const existsInDatabase = async (id, mongooseModel) => {
     return !!(await mongooseModel.findById(id));
 };
