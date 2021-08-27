@@ -20,13 +20,11 @@ const { validateFieldsNotNull, validateSimpleRequest } = require("../helpers/val
 
 const requireAuth = passport.authenticate("jwt", { session: false });
 
-const BLOG_CATEGORY = "blogCategory";
-
-router.param("blogCategoryId", getObjectById(BLOG_CATEGORY, BlogCategory, "La categoría de Blog no existe"));
+router.param("blogCategoryId", getObjectById(BlogCategory, "La categoría de Blog no existe"));
 router.param("userId", userById);
 
 router.get("/blog/categories", getAllObjects(BlogCategory));
-router.get("/blog/categories/:blogCategoryId", getObject(BLOG_CATEGORY));
+router.get("/blog/categories/:blogCategoryId", getObject);
 router.post(
     "/blog/categories/:userId",
     requireAuth,
@@ -43,14 +41,14 @@ router.put(
     isAdmin,
     validateSimpleRequest,
     validateFieldsNotNull(["name"]),
-    updateObject(BLOG_CATEGORY)
+    updateObject
 );
 router.delete(
     "/blog/categories/:blogCategoryId/:userId",
     requireAuth,
     isAuth,
     isAdmin,
-    deleteObject(BLOG_CATEGORY, "La categoría de Blog se eliminó correctamente")
+    deleteObject("La categoría de Blog se eliminó correctamente")
 );
 
 module.exports = router;

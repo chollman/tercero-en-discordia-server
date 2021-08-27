@@ -14,47 +14,41 @@ exports.getAllObjects = (mongooseModel) => (req, res) => {
 };
 
 /**
- *
+ * Ideally should use this function in ALL routes that use a single resource from the DB.
+ * We set the property "reqDbObject" on the req, so we can access the resource being used with a common name
+ * for all functions. So instead of having req.category or req.book, we have req.reqDbObject, and we can
+ * use this to easy access on helpers and validations, otherwise we need to pass as parameter the name of the key
+ * (category or book, for example)
  * @param objectName The name of the object, for example category or blogCategory
  * @param mongooseModel
  * @param errorMessage
  * @returns {(function(*, *, *, *=): void)|*}
  */
-exports.getObjectById = (objectName, mongooseModel, errorMessage) => (req, res, next, id) => {
+exports.getObjectById = (mongooseModel, errorMessage) => (req, res, next, id) => {
     mongooseModel.findById(id).exec((err, dbObject) => {
         if (err || !dbObject) {
             return res.status(400).json({
                 error: errorMessage,
             });
         }
-        req[objectName] = dbObject;
+        req.reqDbObject = dbObject;
         next();
     });
 };
 
-exports.getObject = (objectName) => (req, res) => res.json(req[objectName]);
+exports.getObject = (req, res) => res.json(req.reqDbObject);
 
 exports.createObject = (mongooseModel) => (req, res) => {
     const dbObject = new mongooseModel(req.fields);
     saveInDB(dbObject, res, 201);
 };
 
-exports.updateObject = (objectName) => (req, res) => {
-    let dbObject = _.extend(req[objectName], req.fields);
+exports.updateObject = (req, res) => {
+    let dbObject = _.extend(req.reqDbObject, req.fields);
     saveInDB(dbObject, res, 200);
 };
 
-exports.deleteObject = (objectName, successMessage) => async (req, res) => {
-    const dbObject = req[objectName];
-    // Abstraer esta logica en una validation
-    // const categoryIdsInUse = await Book.distinct("categories", {});
-    // const categoriesInUse = await Category.find({ _id: { $in: categoryIdsInUse } });
-    // for (let categoryInUse of categoriesInUse) {
-    //     if (categoryInUse.id === category.id) {
-    //         return res.status(400).json({
-    //             error: "No se puede borrar la categoría ya que está referenciando al menos un libro",
-    //         });
-    //     }
-    // }
+exports.deleteObject = (successMessage) => async (req, res) => {
+    const dbObject = req.reqDbObject;
     deleteFromDB(dbObject, res, successMessage);
 };
