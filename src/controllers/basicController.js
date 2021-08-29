@@ -1,6 +1,7 @@
 const { errorHandler } = require("../helpers/dbErrorHandler");
 const { saveInDB, deleteFromDBWithResponse } = require("../helpers/dbHelper");
 const _ = require("lodash");
+const Author = require("../models/author");
 
 exports.getAllObjects = (mongooseModel) => (req, res) => {
     mongooseModel.find().exec((err, data) => {
@@ -58,4 +59,20 @@ exports.updateObject = async (req, res) => {
 exports.deleteObject = (successMessage) => (req, res) => {
     const dbObject = req.reqDbObject;
     deleteFromDBWithResponse(dbObject, res, successMessage);
+};
+
+exports.getObjectsBySearch = (mongooseModel) => (req, res) => {
+    const query = {};
+    if (req.query.search) {
+        const regex = { $regex: req.query.search, $options: "i" };
+        query.$or = [{ name: regex }];
+    }
+    mongooseModel.find(query, (err, result) => {
+        if (err) {
+            return res.status(400).json({
+                error: errorHandler(err),
+            });
+        }
+        return res.json(result);
+    });
 };

@@ -15,6 +15,7 @@ const {
     createObject,
     updateObject,
     deleteObject,
+    getObjectsBySearch,
 } = require("../controllers/basicController");
 const { userById } = require("../controllers/user");
 const { validateFieldsNotNull, validateSimpleRequest, validateNoReferences } = require("../helpers/validations");
@@ -25,6 +26,7 @@ router.param("categoryId", getObjectById(Category, "La categoría no existe"));
 router.param("userId", userById);
 
 router.get("/categories", getAllObjects(Category));
+router.get("/categories/search", getObjectsBySearch(Category));
 router.get("/categories/:categoryId", getObject);
 router.post(
     "/categories/:userId",
