@@ -3,6 +3,7 @@ const { errorHandler } = require("../helpers/dbErrorHandler");
 const { saveInDB } = require("../helpers/dbHelper");
 const { setImageInObject } = require("../helpers/utils");
 const _ = require("lodash");
+const Book = require("../models/book");
 
 const MAX_NUMBER_OF_FETCHED_AUTHORS = 20;
 
@@ -57,6 +58,21 @@ exports.getAuthorPhoto = (req, res, next) => {
     next();
 };
 
+exports.getAuthorsBySearch = (req, res) => {
+    const query = {};
+
+    addSearchToQuery(query, req);
+
+    Author.find(query, (err, authors) => {
+        if (err) {
+            return res.status(400).json({
+                error: errorHandler(err),
+            });
+        }
+        res.json(authors.map(createAuthorForResponse));
+    });
+};
+
 const createAuthorForResponse = (author) => {
     let authorForResponse = author.toObject();
     setPhotoStatus(authorForResponse);
@@ -69,3 +85,10 @@ const removePhoto = (author) => (author.photo = undefined);
 const setPhotoStatus = (author) => (author.hasPhoto = !!author.photo);
 
 const setPhotoOfAuthor = (author, files) => setImageInObject(author.photo, files.photo);
+
+const addSearchToQuery = (query, req) => {
+    if (req.query.search) {
+        const regex = { $regex: req.query.search, $options: "i" };
+        query.$or = [{ name: regex }, { biography: regex }];
+    }
+};

@@ -8,7 +8,14 @@ const Author = require("../models/author");
 const Book = require("../models/book");
 
 const { isAuth, isAdmin } = require("../controllers/authentication");
-const { getAllAuthors, createAuthor, updateAuthor, getAuthorPhoto, getAuthor } = require("../controllers/author");
+const {
+    getAllAuthors,
+    createAuthor,
+    updateAuthor,
+    getAuthorPhoto,
+    getAuthor,
+    getAuthorsBySearch,
+} = require("../controllers/author");
 const { getObjectById, deleteObject } = require("../controllers/basicController");
 const { userById } = require("../controllers/user");
 const {
@@ -24,6 +31,7 @@ router.param("authorId", getObjectById(Author, "El autor no existe"));
 router.param("userId", userById);
 
 router.get("/authors", getAllAuthors);
+router.get("/authors/search", getAuthorsBySearch);
 router.get("/authors/:authorId", getAuthor);
 router.post(
     "/authors/:userId",
