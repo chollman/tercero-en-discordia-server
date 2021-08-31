@@ -32,7 +32,11 @@ exports.getAllBooks = (req, res) => {
         });
 };
 
-exports.getBook = (req, res) => res.json(createBookForResponse(req.reqDbObject));
+exports.getBook = async (req, res) => {
+    const book = req.reqDbObject;
+    await book.populate("authors", "-photo").populate("categories").execPopulate();
+    res.json(createBookForResponse(req.reqDbObject));
+};
 
 exports.createBook = async (req, res) => {
     const { fields, files } = req;
