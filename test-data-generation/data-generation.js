@@ -26,6 +26,20 @@ const categoriesArray = [
     { name: "Autoayuda" },
 ];
 
+const tagsArray = [
+    { name: "epub" },
+    { name: "fe de erratas" },
+    { name: "literatura" },
+    { name: "publicar" },
+    { name: "obra" },
+    { name: "marketing" },
+    { name: "estrateias" },
+    { name: "editora" },
+    { name: "corrector" },
+    { name: "autor" },
+    { name: "accesibilidad" },
+];
+
 let authorsArray = [
     {
         name: "Friedich Nietzche",
@@ -246,7 +260,7 @@ mongoose
         console.log("===== Done saving Blog categories =====");
 
         console.log("===== Start saving Blog tags =====");
-        for (let blogTag of categoriesArray) {
+        for (let blogTag of tagsArray) {
             let dbBlogTag = new BlogTag(blogTag);
             await dbBlogTag.save();
         }
