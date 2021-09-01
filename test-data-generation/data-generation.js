@@ -4,7 +4,7 @@ const Category = require("../src/models/category");
 const Author = require("../src/models/author");
 const Book = require("../src/models/book");
 const BlogCategory = require("../src/models/blogCategory");
-const BlogTag = require("../src/models/BlogTag");
+const BlogTag = require("../src/models/blogTag");
 const fs = require("fs");
 const _ = require("lodash");
 
