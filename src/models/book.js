@@ -5,7 +5,7 @@ const bookSchema = new Schema(
     {
         title: { type: String, trim: true, required: true, unique: true },
         description: { type: String, trim: true },
-        authors: [{ type: ObjectId, ref: "authors" }],
+        authors: [{ type: ObjectId, ref: "authors", required: true }],
         isbn: { type: String, trim: true },
         numberOfPages: { type: Number },
         publicationDate: { type: Date },
