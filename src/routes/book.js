@@ -57,6 +57,7 @@ router.put(
     isAuth,
     isAdmin,
     validateFormStatus,
+    validateFieldsNotNull(["authors", "title", "categories"], "Debe especificar al menos un título, autor y categoría"),
     validateImage("coverImage"),
     validateImage("backCoverImage"),
     validateObjectIdArray("categories", Category),
