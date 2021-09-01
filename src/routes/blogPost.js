@@ -12,7 +12,13 @@ const { isAuth, isAdmin } = require("../controllers/authentication");
 const { getAllBlogPosts, getBlogPost, createBlogPost, updateBlogPost } = require("../controllers/blogPost");
 const { getObjectById, deleteObject } = require("../controllers/basicController");
 const { userById } = require("../controllers/user");
-const { validateFieldsNotNull, validateFormStatus, validateObjectIdArray } = require("../helpers/validations");
+const {
+    validateNullArrays,
+    validateFieldsNotNull,
+    validateFormStatus,
+    validateNullableObjectIdArray,
+    validateArrayHasNoEmptyStrings,
+} = require("../helpers/validations");
 
 const requireAuth = passport.authenticate("jwt", { session: false });
 
@@ -27,9 +33,11 @@ router.post(
     isAuth,
     isAdmin,
     validateFormStatus,
+    validateNullArrays(["categories", "tags", "comments"]),
+    validateArrayHasNoEmptyStrings("comments"),
     validateFieldsNotNull(["title"]),
-    validateObjectIdArray("categories", BlogCategory),
-    validateObjectIdArray("tags", BlogTag),
+    validateNullableObjectIdArray("categories", BlogCategory),
+    validateNullableObjectIdArray("tags", BlogTag),
     createBlogPost
 );
 router.put(
@@ -38,9 +46,11 @@ router.put(
     isAuth,
     isAdmin,
     validateFormStatus,
+    validateNullArrays(["categories", "tags", "comments"]),
+    validateArrayHasNoEmptyStrings("comments"),
     validateFieldsNotNull(["title"]),
-    validateObjectIdArray("categories", BlogCategory),
-    validateObjectIdArray("tags", BlogTag),
+    validateNullableObjectIdArray("categories", BlogCategory),
+    validateNullableObjectIdArray("tags", BlogTag),
     updateBlogPost
 );
 router.delete(

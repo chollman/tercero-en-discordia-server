@@ -31,6 +31,18 @@ exports.validateSimpleRequest = (req, res, next) => {
     next();
 };
 
+exports.validateNullArrays = (arrayOfArrayFields) => (req, res, next) => {
+    // in case we want to set an array as empty, we will expect "" in the first element of the array
+    // from the frontend, and only 1 element
+    for (let arrayField of arrayOfArrayFields) {
+        if (!req.fields[arrayField]) continue;
+        if (req.fields[arrayField][0] === "" && req.fields[arrayField].length === 1) {
+            req.fields[arrayField] = [];
+        }
+    }
+    next();
+};
+
 exports.validateUserSignup = (req, res, next) => {
     req.check("email")
         .matches(/.+\@.+\..+/)
@@ -65,7 +77,7 @@ exports.validateObjectId = (objectIdField, mongooseModel) => async (req, res, ne
     next();
 };
 
-exports.validateObjectIdArray = (objectIdArrayField, mongooseModel, isNullable) => async (req, res, next) => {
+exports.validateObjectIdArray = (objectIdArrayField, mongooseModel) => async (req, res, next) => {
     if (req.fields[objectIdArrayField]) {
         const objectIdArray = req.fields[objectIdArrayField];
         if (!objectIdArray.length) {
@@ -82,6 +94,38 @@ exports.validateObjectIdArray = (objectIdArrayField, mongooseModel, isNullable) 
             const validationError = await isValidObjectId(objectId, mongooseModel, objectIdArrayField);
             if (validationError) {
                 return res.status(400).json(validationError);
+            }
+        }
+    }
+    next();
+};
+
+exports.validateNullableObjectIdArray = (objectIdArrayField, mongooseModel) => async (req, res, next) => {
+    if (req.fields[objectIdArrayField]) {
+        let objectIdArray = req.fields[objectIdArrayField];
+        if (objectIdArray.length !== new Set(objectIdArray).size) {
+            return res.status(400).json({
+                error: `El array de ids no puede tener duplicados: ${objectIdArrayField}`,
+            });
+        }
+        for (let objectId of objectIdArray) {
+            const validationError = await isValidObjectId(objectId, mongooseModel, objectIdArrayField);
+            if (validationError) {
+                return res.status(400).json(validationError);
+            }
+        }
+    }
+    next();
+};
+
+exports.validateArrayHasNoEmptyStrings = (arrayField) => (req, res, next) => {
+    const array = req.fields[arrayField];
+    if (array) {
+        for (let elem of array) {
+            if (elem === "") {
+                return res.status(400).json({
+                    error: `No puede haber campos del array vacíos: ${arrayField}`,
+                });
             }
         }
     }
