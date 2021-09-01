@@ -219,6 +219,7 @@ mongoose
             await mongoose.connection.db.dropCollection("categories");
             await mongoose.connection.db.dropCollection("authors");
             await mongoose.connection.db.dropCollection("blog-categories");
+            await mongoose.connection.db.dropCollection("blog-tags");
         } catch (e) {
             console.error(e);
         }
