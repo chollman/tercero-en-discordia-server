@@ -65,7 +65,7 @@ exports.validateObjectId = (objectIdField, mongooseModel) => async (req, res, ne
     next();
 };
 
-exports.validateObjectIdArray = (objectIdArrayField, mongooseModel) => async (req, res, next) => {
+exports.validateObjectIdArray = (objectIdArrayField, mongooseModel, isNullable) => async (req, res, next) => {
     if (req.fields[objectIdArrayField]) {
         const objectIdArray = req.fields[objectIdArrayField];
         if (!objectIdArray.length) {
