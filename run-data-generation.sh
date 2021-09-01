@@ -1,5 +1,6 @@
 cd test-data-generation
-echo CURRENT PWD IS
-pwd
-ls ..
+echo STARTING SCRIPT
 node data-generation.js
+echo FINISHED SCRIPT
+cd ..
+npm start
