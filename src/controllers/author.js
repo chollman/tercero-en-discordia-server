@@ -3,7 +3,6 @@ const { errorHandler } = require("../helpers/dbErrorHandler");
 const { saveInDB } = require("../helpers/dbHelper");
 const { setImageInObject } = require("../helpers/utils");
 const _ = require("lodash");
-const Book = require("../models/book");
 
 const MAX_NUMBER_OF_FETCHED_AUTHORS = 20;
 
@@ -21,7 +20,7 @@ exports.getAllAuthors = (req, res) => {
                     error: errorHandler(err),
                 });
             }
-            res.json(data.map(createAuthorForResponse));
+            return res.json(data.map(createAuthorForResponse));
         });
 };
 
@@ -33,9 +32,9 @@ exports.createAuthor = async (req, res) => {
     setPhotoOfAuthor(author, files);
     const error = await saveInDB(author);
     if (error) {
-        res.status(400).json(error);
+        return res.status(400).json(error);
     }
-    res.status(201).json(createAuthorForResponse(author));
+    return res.status(201).json(createAuthorForResponse(author));
 };
 
 exports.updateAuthor = async (req, res) => {
@@ -44,9 +43,9 @@ exports.updateAuthor = async (req, res) => {
     setPhotoOfAuthor(author, files);
     const error = await saveInDB(author);
     if (error) {
-        res.status(400).json(error);
+        return res.status(400).json(error);
     }
-    res.status(200).json(createAuthorForResponse(author));
+    return res.status(200).json(createAuthorForResponse(author));
 };
 
 exports.getAuthorPhoto = (req, res, next) => {
@@ -69,16 +68,16 @@ exports.getAuthorsBySearch = (req, res) => {
                 error: errorHandler(err),
             });
         }
-        res.json(authors.map(createAuthorForResponse));
+        return res.json(authors.map(createAuthorForResponse));
     });
 };
 
-const createAuthorForResponse = (author) => {
+const createAuthorForResponse = (exports.createAuthorForResponse = (author) => {
     let authorForResponse = author.toObject();
     setPhotoStatus(authorForResponse);
     removePhoto(authorForResponse);
     return authorForResponse;
-};
+});
 
 const removePhoto = (author) => (author.photo = undefined);
 
