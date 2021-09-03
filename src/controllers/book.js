@@ -79,7 +79,7 @@ exports.getCover = (coverField) => (req, res, next) => {
 };
 
 // Example call: /api/books/search?search=test&categories=611b59bb6625d74bc8d7e630
-exports.getBooksBySearch = (req, res) => {
+exports.getBooksBySearch = async (req, res) => {
     const query = {};
 
     addCategoriesToQuery(query, req);
@@ -95,6 +95,7 @@ exports.getBooksBySearch = (req, res) => {
     })
         .populate("categories")
         .populate("authors");
+    await new Promise(r => setTimeout(r, 2000));
 };
 
 exports.getRelatedBooks = (req, res) => {

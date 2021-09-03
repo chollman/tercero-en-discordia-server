@@ -21,7 +21,7 @@ exports.getAllBlogPosts = (req, res) => {
                     error: errorHandler(err),
                 });
             }
-            res.json(data);
+            return res.json(data);
         });
 };
 

@@ -1,7 +1,6 @@
 const { errorHandler } = require("../helpers/dbErrorHandler");
 const { saveInDB, deleteFromDBWithResponse } = require("../helpers/dbHelper");
 const _ = require("lodash");
-const Author = require("../models/author");
 
 exports.getAllObjects = (mongooseModel) => (req, res) => {
     mongooseModel.find().exec((err, data) => {
