@@ -18,6 +18,8 @@ exports.getAllBooks = (req, res) => {
 
     addCategoriesToQuery(query, req);
 
+    console.log("QUERY", query);
+
     Book.find(query)
         .populate("categories")
         .populate("authors")
@@ -29,6 +31,7 @@ exports.getAllBooks = (req, res) => {
                     error: errorHandler(err),
                 });
             }
+            console.log("DATA", data);
             res.json(data.map(createBookForResponse));
         });
 };
@@ -95,7 +98,7 @@ exports.getBooksBySearch = async (req, res) => {
     })
         .populate("categories")
         .populate("authors");
-    await new Promise(r => setTimeout(r, 2000));
+    await new Promise((r) => setTimeout(r, 2000));
 };
 
 exports.getRelatedBooks = (req, res) => {
@@ -136,7 +139,7 @@ exports.getCategoriesInUse = (req, res) => {
 
 const addCategoriesToQuery = (query, req) => {
     if (req.query.categories) {
-        query.category = { $in: req.query.categories.split(",") };
+        query.categories = { $in: req.query.categories.split(",") };
     }
 };
 
