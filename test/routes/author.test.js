@@ -1,14 +1,21 @@
-const authorRoutes = require("src/routes/author");
-const { preConfigureApp } = require("src/index");
-const mongoose = require("mongoose");
+const authorRoutes = require("../../src/routes/author");
+const { appSetup } = require("../../config/app/appSetup");
+const { mongooseDisconnect, mongooseConnect } = require("../../config/mongoose/mongooseSetupTest");
 
 const request = require("supertest");
-const express = require("express");
-const app = express();
-
-preConfigureApp(app, mongoose);
+const app = appSetup();
 app.use("/api", authorRoutes);
 
-test("testing route works", (done) => {
-    request(app).get("/").expect(200, done);
+beforeAll(async () => {
+    jest.setTimeout(10000);
+    await mongooseConnect();
+});
+
+afterAll(async () => {
+    await mongooseDisconnect();
+});
+
+test("testing route works", async () => {
+    const response = await request(app).get("/api/authors");
+    expect(response.statusCode).toBe(200);
 });
