@@ -18,8 +18,6 @@ exports.getAllBooks = (req, res) => {
 
     addCategoriesToQuery(query, req);
 
-    console.log("QUERY", query);
-
     Book.find(query)
         .populate("categories")
         .populate("authors")
@@ -28,10 +26,9 @@ exports.getAllBooks = (req, res) => {
         .exec((err, data) => {
             if (err) {
                 return res.status(400).json({
-                    error: errorHandler(err),
+                    error: errorHandler(err)
                 });
             }
-            console.log("DATA", data);
             res.json(data.map(createBookForResponse));
         });
 };
@@ -52,7 +49,7 @@ exports.createBook = async (req, res) => {
         res.status(201).json(createBookForResponse(book));
     } catch (err) {
         return res.status(400).json({
-            error: errorHandler(err),
+            error: errorHandler(err)
         });
     }
 };
@@ -67,7 +64,7 @@ exports.updateBook = async (req, res) => {
         res.status(200).json(createBookForResponse(book));
     } catch (err) {
         return res.status(400).json({
-            error: errorHandler(err),
+            error: errorHandler(err)
         });
     }
 };
@@ -91,7 +88,7 @@ exports.getBooksBySearch = async (req, res) => {
     Book.find(query, (err, books) => {
         if (err) {
             return res.status(400).json({
-                error: errorHandler(err),
+                error: errorHandler(err)
             });
         }
         res.json(books.map(createBookForResponse));
@@ -101,35 +98,51 @@ exports.getBooksBySearch = async (req, res) => {
     await new Promise((r) => setTimeout(r, 2000));
 };
 
-exports.getRelatedBooks = (req, res) => {
+exports.getRelatedBooks = async (req, res) => {
     let limit = req.query.limit ? parseInt(req.query.limit) : MAX_NUMBER_OF_FETCHED_RELATED_BOOKS;
-    const book = req.reqDbObject;
+    let book = req.reqDbObject;
 
-    Book.find({ _id: { $ne: book }, category: book.category })
+    //find books with same author
+    //find books with same category
+    // merge
+
+    const booksOfAuthor = await Book.find({
+            _id: { $ne: book },
+            authors: { $in: book.authors }
+        }
+    )
         .limit(limit)
         .populate("categories")
-        .populate("authors")
-        .exec((err, books) => {
-            if (err) {
-                return res.status(400).json({
-                    error: errorHandler(err),
-                });
-            }
-            res.json(books.map(createBookForResponse));
-        });
+        .populate("authors");
+
+    const booksWithSameCategory = await Book.find({
+            _id: { $ne: book },
+            categories: { $in: book.categories }
+        }
+    )
+        .limit(limit)
+        .populate("categories")
+        .populate("authors");
+    let books = [...booksOfAuthor];
+    for (let book of booksWithSameCategory) {
+        if (!booksOfAuthor.some(bookOfAuthor => bookOfAuthor._id.toString() === book._id.toString())) {
+            books.push(book);
+        }
+    }
+    res.json(books.map(createBookForResponse));
 };
 
 exports.getCategoriesInUse = (req, res) => {
     Book.distinct("categories", {}, (err, categoryIds) => {
         if (err) {
             return res.status(400).json({
-                error: errorHandler(err),
+                error: errorHandler(err)
             });
         }
         Category.find({ _id: { $in: categoryIds } }).exec((err, categories) => {
             if (err) {
                 return res.status(400).json({
-                    error: errorHandler(err),
+                    error: errorHandler(err)
                 });
             }
             return res.json(categories);
